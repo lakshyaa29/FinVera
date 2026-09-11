@@ -1,0 +1,88 @@
+import { Achievement } from '../types';
+
+export const ALL_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first-lesson',
+    title: 'First Step',
+    description: 'Completed your very first financial education lesson.',
+    icon: '🌱',
+    xpReward: 50,
+  },
+  {
+    id: 'first-quiz',
+    title: 'Quiz Whiz',
+    description: 'Scored 100% on a lesson knowledge check.',
+    icon: '🎯',
+    xpReward: 50,
+  },
+  {
+    id: 'calculator-explorer',
+    title: 'Number Cruncher',
+    description: 'Interacted with all 5 financial calculators in the Calculator Center.',
+    icon: '🧮',
+    xpReward: 75,
+  },
+  {
+    id: 'streak-3-days',
+    title: 'Habit Builder',
+    description: 'Maintained a 3-day continuous learning streak.',
+    icon: '🔥',
+    xpReward: 100,
+  },
+  {
+    id: 'streak-7-days',
+    title: '7 Day Learner',
+    description: 'Maintained a 7-day continuous learning streak.',
+    icon: '⚡',
+    xpReward: 200,
+  },
+  {
+    id: 'money-basics-complete',
+    title: 'Money Basics Master',
+    description: 'Finished all Level 1 foundational money lessons.',
+    icon: '💰',
+    xpReward: 150,
+  },
+  {
+    id: 'banking-unlocked',
+    title: 'Banking Unlocked',
+    description: 'Completed enough lessons to unlock Level 3 Banking.',
+    icon: '🏛️',
+    xpReward: 100,
+  },
+  {
+    id: 'credit-unlocked',
+    title: 'Credit Unlocked',
+    description: 'Unlocked Level 4 Credit and debt management.',
+    icon: '💳',
+    xpReward: 100,
+  },
+  {
+    id: 'investing-unlocked',
+    title: 'Investing Unlocked',
+    description: 'Reached Level 5 and unlocked the stock market & mutual funds.',
+    icon: '📈',
+    xpReward: 150,
+  },
+  {
+    id: 'first-simulation',
+    title: 'First Virtual Trade',
+    description: 'Executed your first simulated market purchase in the practice playground.',
+    icon: '🚀',
+    xpReward: 100,
+  },
+  {
+    id: 'lessons-10-complete',
+    title: '10 Lessons Complete',
+    description: 'Reached double digits in completed financial lessons.',
+    icon: '🏅',
+    xpReward: 200,
+  },
+  {
+    id: 'lessons-25-complete',
+    title: '25 Lessons Complete',
+    description: 'Mastered 25+ comprehensive lessons across FinVera.',
+    icon: '👑',
+    xpReward: 350,
+  },
+];
