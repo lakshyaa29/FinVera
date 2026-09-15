@@ -1,0 +1,68 @@
+{
+  "users": {
+    "usr_guest_demo": {
+      "id": "usr_guest_demo",
+      "email": "guest@finvera.local",
+      "passwordHash": "",
+      "name": "Guest Explorer",
+      "ageGroup": "18-24",
+      "occupation": "student",
+      "knowledgeLevel": "beginner",
+      "learningGoals": [
+        "Money Basics",
+        "Investing"
+      ],
+      "riskComfort": "balanced",
+      "onboarded": true,
+      "createdAt": "2026-09-15T00:00:00.000Z",
+      "updatedAt": "2026-09-15T00:00:00.000Z",
+      "authProvider": "guest"
+    }
+  },
+  "user_progress": {
+    "usr_guest_demo": {
+      "xp": 100,
+      "levelTitle": "Money Beginner",
+      "streakDays": 1,
+      "lastActiveDate": "2026-09-15",
+      "completedLessonIds": [
+        "money-101"
+      ],
+      "unlockedLevels": [
+        1,
+        2
+      ],
+      "completedMissions": [],
+      "exploredCalculators": [
+        "compound-interest",
+        "sip"
+      ],
+      "achievements": [
+        "first-lesson"
+      ],
+      "weeklyActivity": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "simulated_portfolios": {
+    "usr_guest_demo": {
+      "virtualCash": 100000,
+      "holdings": {},
+      "transactions": []
+    }
+  },
+  "health_quiz_answers": {
+    "usr_guest_demo": {
+      "scores": {},
+      "overallScore": 0
+    }
+  },
+  "otps": {}
+}

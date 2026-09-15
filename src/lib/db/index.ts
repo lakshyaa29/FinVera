@@ -61,9 +61,15 @@ if (isPostgresConfigured) {
   }
 }
 
-// Local persistent JSON database file for zero-friction local development
-const LOCAL_DB_DIR = path.join(process.cwd(), '.data');
+import os from 'os';
+
+// Local persistent JSON database file for zero-friction local development & Vercel serverless
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const LOCAL_DB_DIR = isServerless
+  ? path.join(os.tmpdir(), 'finvera_data')
+  : path.join(process.cwd(), '.data');
 const LOCAL_DB_PATH = path.join(LOCAL_DB_DIR, 'finvera_db.json');
+const SEED_DATA_PATH = path.join(process.cwd(), 'src', 'data', 'initialDb.json');
 
 interface LocalDatabaseSchema {
   users: Record<string, DbUser>;
@@ -73,46 +79,69 @@ interface LocalDatabaseSchema {
   otps?: Record<string, { code: string; expiresAt: number }>;
 }
 
+let inMemoryDbCache: LocalDatabaseSchema | null = null;
+
+function getSeedDatabase(): LocalDatabaseSchema {
+  try {
+    if (fs.existsSync(SEED_DATA_PATH)) {
+      const seedContent = fs.readFileSync(SEED_DATA_PATH, 'utf-8');
+      const parsed = JSON.parse(seedContent);
+      if (!parsed.otps) parsed.otps = {};
+      return parsed;
+    }
+  } catch (err) {
+    console.warn('[FinVera DB] Seed database load skipped:', err);
+  }
+  return {
+    users: {},
+    user_progress: {},
+    simulated_portfolios: {},
+    health_quiz_answers: {},
+    otps: {},
+  };
+}
+
 function readLocalDb(): LocalDatabaseSchema {
+  if (inMemoryDbCache) {
+    return inMemoryDbCache;
+  }
+
   try {
     if (!fs.existsSync(LOCAL_DB_DIR)) {
       fs.mkdirSync(LOCAL_DB_DIR, { recursive: true });
     }
     if (!fs.existsSync(LOCAL_DB_PATH)) {
-      const initial: LocalDatabaseSchema = {
-        users: {},
-        user_progress: {},
-        simulated_portfolios: {},
-        health_quiz_answers: {},
-        otps: {},
-      };
-      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(initial, null, 2), 'utf-8');
+      const initial = getSeedDatabase();
+      try {
+        fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(initial, null, 2), 'utf-8');
+      } catch {
+        // In read-only environments, write to disk may fail gracefully
+      }
+      inMemoryDbCache = initial;
       return initial;
     }
     const data = fs.readFileSync(LOCAL_DB_PATH, 'utf-8');
     const parsed = JSON.parse(data);
     if (!parsed.otps) parsed.otps = {};
+    inMemoryDbCache = parsed;
     return parsed;
   } catch (err) {
-    console.error('[FinVera DB] Error reading local db:', err);
-    return {
-      users: {},
-      user_progress: {},
-      simulated_portfolios: {},
-      health_quiz_answers: {},
-      otps: {},
-    };
+    console.error('[FinVera DB] Error reading local db, using seed fallback:', err);
+    const fallback = getSeedDatabase();
+    inMemoryDbCache = fallback;
+    return fallback;
   }
 }
 
 function writeLocalDb(db: LocalDatabaseSchema): void {
+  inMemoryDbCache = db;
   try {
     if (!fs.existsSync(LOCAL_DB_DIR)) {
       fs.mkdirSync(LOCAL_DB_DIR, { recursive: true });
     }
     fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
   } catch (err) {
-    console.error('[FinVera DB] Error writing local db:', err);
+    console.error('[FinVera DB] Error writing local db (in-memory state preserved):', err);
   }
 }
 
