@@ -4,7 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import { Lesson, LessonLevel } from '../../types';
 import { evaluateLevelUnlock } from '../../data/unlockRequirements';
-import { Lock, CheckCircle2, ArrowRight, Sparkles, BookOpen, Clock, Zap } from 'lucide-react';
+import {
+  Lock,
+  ArrowRight,
+  Clock,
+  Zap,
+  Wallet,
+  ShieldCheck,
+  Layers,
+  CreditCard,
+  TrendingUp,
+  Award,
+} from 'lucide-react';
 
 interface RoadmapLevelNodeProps {
   levelNumber: LessonLevel;
@@ -17,11 +28,25 @@ interface RoadmapLevelNodeProps {
   allLessons: Lesson[];
 }
 
+const LEVEL_THEMES: Record<
+  LessonLevel,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    accentBg: string;
+  }
+> = {
+  1: { icon: Wallet, accentBg: 'bg-[#70E000]' },
+  2: { icon: ShieldCheck, accentBg: 'bg-[#6C8CFF]' },
+  3: { icon: Layers, accentBg: 'bg-[#B99CFF]' },
+  4: { icon: CreditCard, accentBg: 'bg-[#FFD84D]' },
+  5: { icon: TrendingUp, accentBg: 'bg-[#A8F0D0]' },
+  6: { icon: Award, accentBg: 'bg-[#FF6B6B]' },
+};
+
 export function RoadmapLevelNode({
   levelNumber,
   levelTitle,
   badge,
-  icon,
   description,
   lessons,
   completedLessonIds,
@@ -31,90 +56,97 @@ export function RoadmapLevelNode({
   const isComplete =
     unlockState.completedInThisLevel === unlockState.totalInThisLevel &&
     unlockState.totalInThisLevel > 0;
+  const isCurrentActive = unlockState.isUnlocked && !isComplete;
+
+  const theme = LEVEL_THEMES[levelNumber] || LEVEL_THEMES[1];
+  const LevelIcon = theme.icon;
 
   return (
     <div
-      className={`rounded-3xl border transition-all duration-300 relative overflow-hidden ${
-        unlockState.isUnlocked
-          ? 'bg-slate-900/90 border-slate-700/80 shadow-xl'
-          : 'bg-slate-950/60 border-slate-800/60 opacity-80'
+      className={`rounded-xl border-3 border-[#171717] transition-all bg-[#FFFFFF] overflow-hidden ${
+        isCurrentActive
+          ? 'shadow-[6px_6px_0px_#171717] ring-4 ring-[#70E000]/40'
+          : unlockState.isUnlocked
+          ? 'shadow-[4px_4px_0px_#171717]'
+          : 'opacity-70 bg-[#F8F8F3] shadow-[2px_2px_0px_#171717]'
       }`}
     >
       {/* Top Banner Header */}
-      <div className="p-5 sm:p-6 border-b border-slate-800/80">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 sm:p-6 border-b-2 border-[#171717] bg-[#FAFAF7]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
+            {/* Level Icon Node */}
             <div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${
-                unlockState.isUnlocked
-                  ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/30 border border-emerald-500/30 text-emerald-400'
-                  : 'bg-slate-900 border border-slate-800 text-slate-500'
+              className={`w-12 h-12 rounded-lg border-2 border-[#171717] flex items-center justify-center shadow-[3px_3px_0px_#171717] shrink-0 ${
+                unlockState.isUnlocked ? theme.accentBg : 'bg-[#E5E5DE] text-[#6B6B6B]'
               }`}
             >
-              {icon}
+              <LevelIcon className="w-6 h-6 stroke-[2.5] text-[#171717]" />
             </div>
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 uppercase font-mono">
+                <span className="nb-tag bg-[#FFFFFF] text-[#171717]">
                   {badge}
                 </span>
+
                 {isComplete && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Completed
+                  <span className="nb-tag bg-[#70E000] text-[#171717]">
+                    ✓ COMPLETED
+                  </span>
+                )}
+                {isCurrentActive && (
+                  <span className="nb-tag bg-[#FFD84D] text-[#171717]">
+                    ● ACTIVE
                   </span>
                 )}
                 {!unlockState.isUnlocked && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> Locked
+                  <span className="nb-tag bg-[#E5E5DE] text-[#6B6B6B]">
+                    <Lock className="w-3 h-3 text-[#171717]" /> LOCKED
                   </span>
                 )}
               </div>
-              <h3 className="text-lg sm:text-xl font-extrabold text-white mt-0.5 tracking-tight">
-                {levelTitle}
+
+              <h3 className="font-display font-black text-xl sm:text-2xl text-[#171717] mt-1 tracking-tight">
+                {levelTitle.toUpperCase()}
               </h3>
             </div>
           </div>
 
           {/* Status Text & Progress Bar */}
-          <div className="sm:text-right min-w-[160px]">
-            <div className="text-xs font-semibold text-slate-300 mb-1.5 flex sm:justify-end items-center gap-1">
+          <div className="sm:text-right min-w-[180px]">
+            <div className="text-xs font-mono font-bold text-[#171717] mb-1.5 flex sm:justify-end items-center gap-1">
               {!unlockState.isUnlocked ? (
-                <span className="text-amber-400 flex items-center gap-1 font-medium">
+                <span className="text-[#FF6B6B] flex items-center gap-1">
                   <Lock className="w-3.5 h-3.5" />
                   {unlockState.statusText}
                 </span>
               ) : isComplete ? (
-                <span className="text-emerald-400 font-bold">100% Completed</span>
+                <span className="text-[#171717] bg-[#70E000] px-2 py-0.5 rounded border border-[#171717]">
+                  100% COMPLETE
+                </span>
               ) : (
                 <span>
-                  {unlockState.completedInThisLevel} / {unlockState.totalInThisLevel} Lessons (
-                  {unlockState.progressPercent}%)
+                  {unlockState.completedInThisLevel} / {unlockState.totalInThisLevel} Lessons ({unlockState.progressPercent}%)
                 </span>
               )}
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full sm:w-40 h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full sm:w-44 h-3 bg-[#E5E5DE] border-2 border-[#171717] rounded-full overflow-hidden">
               <div
                 style={{ width: `${unlockState.progressPercent}%` }}
-                className={`h-full rounded-full transition-all duration-500 ${
-                  isComplete
-                    ? 'bg-emerald-400'
-                    : unlockState.isUnlocked
-                    ? 'bg-gradient-to-r from-teal-500 to-emerald-400'
-                    : 'bg-slate-700'
-                }`}
+                className="h-full bg-[#171717] transition-all duration-300"
               />
             </div>
           </div>
         </div>
 
-        <p className="text-xs text-slate-400 mt-3">{description}</p>
+        <p className="text-xs text-[#6B6B6B] font-medium mt-2.5 leading-relaxed">{description}</p>
       </div>
 
       {/* Lessons List inside this Level */}
-      <div className="p-4 sm:p-6 divide-y divide-slate-800/60 space-y-2 sm:space-y-0">
+      <div className="p-4 space-y-2.5">
         {lessons.map((lesson, idx) => {
           const isLessonDone = completedLessonIds.includes(lesson.id);
           const canAccessLesson = unlockState.isUnlocked;
@@ -122,77 +154,76 @@ export function RoadmapLevelNode({
           return (
             <div
               key={lesson.id}
-              className={`py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl transition-colors ${
+              className={`p-3 sm:p-3.5 rounded-lg border-2 border-[#171717] flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
                 canAccessLesson
-                  ? 'hover:bg-slate-800/40 sm:px-3 -mx-1 sm:mx-0'
-                  : 'opacity-60 cursor-not-allowed sm:px-3'
+                  ? 'bg-[#FFFFFF] hover:bg-[#FAFAF7] shadow-[2px_2px_0px_#171717]'
+                  : 'bg-[#F8F8F3] opacity-60 cursor-not-allowed'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div
-                  className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 ${
+                  className={`w-7 h-7 rounded-md border-2 border-[#171717] flex items-center justify-center font-display font-black text-xs shrink-0 mt-0.5 ${
                     isLessonDone
-                      ? 'bg-emerald-500 text-slate-950 font-extrabold shadow-sm'
+                      ? 'bg-[#70E000] text-[#171717]'
                       : canAccessLesson
-                      ? 'bg-slate-800 text-slate-300 border border-slate-700'
-                      : 'bg-slate-900 text-slate-600 border border-slate-800'
+                      ? 'bg-[#FFD84D] text-[#171717]'
+                      : 'bg-[#E5E5DE] text-[#6B6B6B]'
                   }`}
                 >
-                  {isLessonDone ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+                  {isLessonDone ? '✓' : idx + 1}
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2">
                     <h4
-                      className={`text-sm font-semibold tracking-tight ${
+                      className={`font-display font-bold text-sm tracking-tight ${
                         isLessonDone
-                          ? 'text-slate-200 line-through decoration-slate-600'
-                          : canAccessLesson
-                          ? 'text-white'
-                          : 'text-slate-400'
+                          ? 'text-[#6B6B6B] line-through'
+                          : 'text-[#171717]'
                       }`}
                     >
                       {lesson.title}
                     </h4>
                     {lesson.interactiveType !== 'quiz-only' && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/15 text-teal-400 border border-teal-500/25 font-mono">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#B99CFF] text-[#171717] border border-[#171717]">
                         Interactive
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                  <p className="text-xs text-[#6B6B6B] mt-0.5 line-clamp-1">
                     {lesson.shortDescription}
                   </p>
                 </div>
               </div>
 
-              {/* Lesson Meta + CTA */}
+              {/* Lesson Meta + CTA Button */}
               <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pl-10 sm:pl-0">
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span className="flex items-center gap-1 font-mono">
-                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                <div className="flex items-center gap-3 text-xs font-mono font-bold text-[#171717]">
+                  <span className="flex items-center gap-1 text-[#6B6B6B]">
+                    <Clock className="w-3.5 h-3.5" />
                     {lesson.estimatedMinutes}m
                   </span>
-                  <span className="flex items-center gap-1 font-mono text-emerald-400 font-bold">
-                    <Zap className="w-3 h-3 fill-emerald-400" />+{lesson.xpReward} XP
+                  <span className="flex items-center gap-1 bg-[#70E000] px-1.5 py-0.5 rounded border border-[#171717]">
+                    <Zap className="w-3 h-3 fill-[#171717]" />
+                    +{lesson.xpReward} XP
                   </span>
                 </div>
 
                 {canAccessLesson ? (
                   <Link
                     href={`/learn/${lesson.id}`}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    className={`nb-btn text-xs py-1.5 px-3.5 ${
                       isLessonDone
-                        ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
-                        : 'bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 hover:scale-105 active:scale-95'
+                        ? 'nb-btn-secondary'
+                        : 'nb-btn-primary'
                     }`}
                   >
                     <span>{isLessonDone ? 'Review' : 'Start'}</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                   </Link>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800/80">
-                    <Lock className="w-3 h-3 text-slate-600" />
+                  <div className="flex items-center gap-1.5 text-xs text-[#6B6B6B] font-bold px-3 py-1 rounded bg-[#E5E5DE] border border-[#171717]">
+                    <Lock className="w-3 h-3 text-[#171717]" />
                     <span>Locked</span>
                   </div>
                 )}

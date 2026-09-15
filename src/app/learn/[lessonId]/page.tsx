@@ -19,15 +19,13 @@ import { QuizComponent } from '../../../components/lessons/QuizComponent';
 import { CompletionModal } from '../../../components/lessons/CompletionModal';
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
-  Sparkles,
   Zap,
   Lock,
-  CheckCircle2,
-  HelpCircle,
-  TrendingUp,
-  Target,
   Clock,
+  Target,
+  Check,
 } from 'lucide-react';
 
 export default function LessonDetailPage() {
@@ -46,13 +44,13 @@ export default function LessonDetailPage() {
     return (
       <AppShell>
         <div className="text-center py-20 space-y-4">
-          <h2 className="text-xl font-bold text-white">Lesson Not Found</h2>
-          <p className="text-sm text-slate-400">The lesson you are looking for does not exist.</p>
+          <h2 className="font-display font-black text-2xl text-[#171717]">Lesson Not Found</h2>
+          <p className="text-sm text-[#6B6B6B]">The lesson you are looking for does not exist.</p>
           <Link
             href="/learn"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-sm font-semibold"
+            className="nb-btn nb-btn-secondary text-sm"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
             <span>Return to Roadmap</span>
           </Link>
         </div>
@@ -66,32 +64,31 @@ export default function LessonDetailPage() {
   if (!unlockState.isUnlocked) {
     return (
       <AppShell>
-        <div className="max-w-md mx-auto my-16 p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center shadow-2xl">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8" />
+        <div className="max-w-md mx-auto my-16 p-8 rounded-xl bg-[#FFFFFF] border-3 border-[#171717] text-center shadow-[6px_6px_0px_#171717]">
+          <div className="w-14 h-14 mx-auto rounded-lg bg-[#FFD84D] border-2 border-[#171717] flex items-center justify-center mb-4 shadow-[3px_3px_0px_#171717]">
+            <Lock className="w-6 h-6 text-[#171717]" />
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
-            Section Locked
+          <span className="nb-tag bg-[#FF6B6B] text-[#171717]">
+            SECTION LOCKED
           </span>
-          <h2 className="text-2xl font-extrabold text-white mt-1 mb-2">
-            {lesson.levelName} is Locked
+          <h2 className="font-display font-black text-2xl text-[#171717] mt-3 mb-2 tracking-tight">
+            {lesson.levelName.toUpperCase()} IS LOCKED
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
-            {unlockState.statusText}. Complete prerequisite lessons to earn access to this topic.
+          <p className="text-xs sm:text-sm text-[#6B6B6B] mb-6 leading-relaxed font-medium">
+            {unlockState.statusText}. Complete prerequisite foundational modules to earn access.
           </p>
           <Link
             href="/learn"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20"
+            className="nb-btn nb-btn-primary text-sm w-full py-3"
           >
-            <span>Go to Active Lessons</span>
-            <ArrowLeft className="w-4 h-4 rotate-180" />
+            <span>Go to Active Roadmap</span>
+            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
           </Link>
         </div>
       </AppShell>
     );
   }
 
-  // Next lesson identification
   const currentIndex = ALL_LESSONS.findIndex((l) => l.id === lesson.id);
   const nextLesson = ALL_LESSONS[currentIndex + 1];
 
@@ -108,80 +105,83 @@ export default function LessonDetailPage() {
 
   return (
     <AppShell>
-      <div className="max-w-3xl mx-auto space-y-8 pb-12">
-        {/* Navigation Bar */}
-        <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="max-w-3xl mx-auto space-y-8 pb-14">
+        {/* Navigation Breadcrumb Bar */}
+        <div className="flex items-center justify-between gap-4 pb-4 border-b-2 border-[#171717]">
           <Link
             href="/learn"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+            className="nb-btn nb-btn-secondary text-xs py-1.5 px-3"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Roadmap</span>
+            <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Roadmap</span>
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
-              Level {lesson.level}: {lesson.levelName}
+            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#FFFFFF] border-2 border-[#171717] text-[#171717]">
+              L0{lesson.level}: {lesson.levelName}
             </span>
-            <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-[#70E000] border-2 border-[#171717] text-[#171717]">
               +{lesson.xpReward} XP
             </span>
           </div>
         </div>
 
         {/* Lesson Header Banner */}
-        <div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 font-mono mb-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#6B6B6B]">
             <Clock className="w-3.5 h-3.5" />
-            <span>{lesson.estimatedMinutes} min read</span>
+            <span>{lesson.estimatedMinutes} MIN READ</span>
             <span>•</span>
-            <span className="text-teal-400 font-semibold">{lesson.concept}</span>
+            <span className="text-[#171717]">{lesson.concept.toUpperCase()}</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            {lesson.title}
+          <h1 className="font-display font-black text-3xl sm:text-5xl text-[#171717] tracking-tight leading-[1.05]">
+            {lesson.title.toUpperCase()}
           </h1>
-          <p className="text-sm sm:text-base text-slate-300 mt-2 leading-relaxed">
+          <p className="text-sm sm:text-base text-[#171717] font-medium leading-relaxed">
             {lesson.shortDescription}
           </p>
 
           {isAlreadyCompleted && (
-            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>You have completed this lesson! (Reviewing)</span>
+            <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#70E000] border-2 border-[#171717] text-xs font-display font-black text-[#171717] shadow-[2px_2px_0px_#171717]">
+              <span>✓ YOU HAVE COMPLETED THIS MODULE (REVIEW MODE)</span>
             </div>
           )}
         </div>
 
         {/* 1. LEARN STEP: Written Concepts */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-            <BookOpen className="w-4 h-4" />
-            <span>1. Learn the Core Principles</span>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="nb-tag bg-[#70E000] text-[#171717]">
+              STEP 1
+            </span>
+            <span className="font-display font-black text-xs uppercase tracking-wider text-[#171717]">
+              CORE PRINCIPLES
+            </span>
           </div>
 
           <div className="space-y-4">
             {lesson.contentSections.map((section, idx) => (
               <div
                 key={idx}
-                className="p-5 sm:p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3"
+                className="p-6 rounded-xl bg-[#FFFFFF] border-3 border-[#171717] shadow-[4px_4px_0px_#171717] space-y-3"
               >
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                <h3 className="font-display font-black text-lg sm:text-xl text-[#171717] tracking-tight">
                   {section.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                <p className="text-xs sm:text-sm text-[#171717] font-medium leading-relaxed whitespace-pre-line">
                   {section.body}
                 </p>
 
                 {section.keyTakeaways && section.keyTakeaways.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-slate-800 space-y-1.5">
-                    <span className="text-xs font-bold text-teal-400 uppercase tracking-wider">
-                      Key Takeaways:
+                  <div className="mt-4 pt-3.5 border-t-2 border-[#171717] space-y-2 bg-[#FAFAF7] p-3 rounded-lg border">
+                    <span className="font-display font-black text-xs uppercase tracking-wider text-[#171717]">
+                      KEY TAKEAWAYS:
                     </span>
-                    <ul className="space-y-1 text-xs text-slate-300">
+                    <ul className="space-y-1.5 text-xs text-[#171717] font-medium">
                       {section.keyTakeaways.map((point, pIdx) => (
                         <li key={pIdx} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 shrink-0" />
-                          <span>{point}</span>
+                          <span className="font-bold text-[#70E000] text-sm leading-none mt-0.5">●</span>
+                          <span className="leading-relaxed">{point}</span>
                         </li>
                       ))}
                     </ul>
@@ -194,9 +194,13 @@ export default function LessonDetailPage() {
 
         {/* 2. UNDERSTAND STEP: Explain Simply Mode */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-teal-400 font-mono">
-            <Sparkles className="w-4 h-4" />
-            <span>2. Concept Translation</span>
+          <div className="flex items-center gap-2">
+            <span className="nb-tag bg-[#6C8CFF] text-[#171717]">
+              STEP 2
+            </span>
+            <span className="font-display font-black text-xs uppercase tracking-wider text-[#171717]">
+              CONCEPT TRANSLATION
+            </span>
           </div>
           <ExplainSimplyToggle data={lesson.explainSimply} />
         </div>
@@ -205,17 +209,18 @@ export default function LessonDetailPage() {
         {lesson.interactiveType !== 'quiz-only' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                <Target className="w-4 h-4" />
-                <span>3. Try It Yourself & Test the Math</span>
+              <div className="flex items-center gap-2">
+                <span className="nb-tag bg-[#FFD84D] text-[#171717]">
+                  STEP 3
+                </span>
+                <span className="font-display font-black text-xs uppercase tracking-wider text-[#171717]">
+                  TRY IT YOURSELF & TEST THE MATH
+                </span>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400">
-                Learn → Try → Change Numbers
-              </span>
             </div>
 
             {lesson.interactivePrompt && (
-              <p className="text-xs text-slate-400 italic mb-2">
+              <p className="text-xs font-mono font-bold text-[#6B6B6B] mb-2">
                 💡 {lesson.interactivePrompt}
               </p>
             )}
@@ -247,53 +252,55 @@ export default function LessonDetailPage() {
         {/* 4. REAL-LIFE SCENARIO STEP */}
         {lesson.realLifeScenario && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
-              <TrendingUp className="w-4 h-4" />
-              <span>4. Real-World Decision Challenge</span>
+            <div className="flex items-center gap-2">
+              <span className="nb-tag bg-[#B99CFF] text-[#171717]">
+                STEP 4
+              </span>
+              <span className="font-display font-black text-xs uppercase tracking-wider text-[#171717]">
+                REAL-WORLD DECISION CHALLENGE
+              </span>
             </div>
 
-            <div className="p-5 sm:p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-md">
-              <h3 className="text-base font-bold text-white mb-2">
-                {lesson.realLifeScenario.title}
+            <div className="p-6 rounded-xl bg-[#FFFFFF] border-3 border-[#171717] shadow-[4px_4px_0px_#171717]">
+              <h3 className="font-display font-black text-lg text-[#171717] mb-2">
+                {lesson.realLifeScenario.title.toUpperCase()}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-5">
+              <p className="text-xs sm:text-sm text-[#171717] font-medium leading-relaxed mb-5">
                 {lesson.realLifeScenario.scenario}
               </p>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {lesson.realLifeScenario.choices.map((choice, cIdx) => {
                   const isSelected = selectedScenarioChoice === cIdx;
                   return (
                     <div key={cIdx} className="space-y-2">
                       <button
                         onClick={() => setSelectedScenarioChoice(cIdx)}
-                        className={`w-full text-left p-3.5 rounded-2xl border transition-all text-xs sm:text-sm font-medium flex items-center justify-between gap-3 ${
+                        className={`w-full text-left p-4 rounded-lg border-2 border-[#171717] transition-all text-xs sm:text-sm font-display font-bold flex items-center justify-between gap-3 cursor-pointer ${
                           isSelected
                             ? choice.isOptimal
-                              ? 'bg-emerald-950/40 border-emerald-500/80 text-emerald-200'
-                              : 'bg-amber-950/40 border-amber-500/80 text-amber-200'
-                            : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                              ? 'bg-[#70E000] text-[#171717] shadow-[2px_2px_0px_#171717] translate-x-0.5 translate-y-0.5'
+                              : 'bg-[#FF6B6B] text-[#171717] shadow-[2px_2px_0px_#171717] translate-x-0.5 translate-y-0.5'
+                            : 'bg-[#FAFAF7] hover:bg-[#FFFFFF] shadow-[2px_2px_0px_#171717]'
                         }`}
                       >
                         <span>{choice.text}</span>
                         {isSelected && (
-                          <CheckCircle2
-                            className={`w-4 h-4 shrink-0 ${
-                              choice.isOptimal ? 'text-emerald-400' : 'text-amber-400'
-                            }`}
-                          />
+                          <span className="font-mono text-xs font-black">
+                            {choice.isOptimal ? '✓ OPTIMAL' : '✕ SUB-OPTIMAL'}
+                          </span>
                         )}
                       </button>
 
                       {isSelected && (
                         <div
-                          className={`p-3.5 rounded-xl text-xs leading-relaxed ${
+                          className={`p-3.5 rounded-lg border-2 border-[#171717] text-xs leading-relaxed ${
                             choice.isOptimal
-                              ? 'bg-emerald-950/30 border border-emerald-500/30 text-emerald-300'
-                              : 'bg-amber-950/30 border border-amber-500/30 text-amber-300'
+                              ? 'bg-[#EBFBF4] text-[#171717]'
+                              : 'bg-[#FFEBEB] text-[#171717]'
                           }`}
                         >
-                          <span className="font-bold">Feedback: </span>
+                          <span className="font-bold">Financial Analysis: </span>
                           {choice.explanation}
                         </div>
                       )}
@@ -307,15 +314,19 @@ export default function LessonDetailPage() {
 
         {/* 5. TEST STEP: Knowledge Check Quiz */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-400 font-mono">
-            <Zap className="w-4 h-4" />
-            <span>5. Knowledge Check & XP Reward</span>
+          <div className="flex items-center gap-2">
+            <span className="nb-tag bg-[#FF6B6B] text-[#171717]">
+              STEP 5
+            </span>
+            <span className="font-display font-black text-xs uppercase tracking-wider text-[#171717]">
+              KNOWLEDGE CHECK & XP REWARD
+            </span>
           </div>
 
           <QuizComponent questions={lesson.quiz} onComplete={handleQuizComplete} />
         </div>
 
-        {/* Completion Modal */}
+        {/* Completion Celebration Modal */}
         <CompletionModal
           isOpen={isCompletedModalOpen}
           lessonTitle={lesson.title}

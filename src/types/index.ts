@@ -15,6 +15,10 @@ export interface UserProfile {
   riskComfort: RiskComfort;
   onboarded: boolean;
   createdAt: string;
+  phone?: string;
+  email?: string;
+  authProvider?: string;
+  avatar?: string;
 }
 
 export type LessonLevel = 1 | 2 | 3 | 4 | 5 | 6;
@@ -138,15 +142,120 @@ export interface SimulatedPortfolio {
   transactions: SimulatedTransaction[];
 }
 
-export interface GlossaryTerm {
+export type GlossaryCategory =
+  | 'Money Basics'
+  | 'Banking'
+  | 'Credit'
+  | 'Investing'
+  | 'Markets'
+  | 'Risk'
+  | 'Taxes'
+  | 'Wealth';
+
+export type ConceptMasteryStatus = 'locked' | 'learning' | 'practicing' | 'tested' | 'mastered';
+
+export interface PlayableConcept {
   id: string;
   term: string;
-  category: 'Investing' | 'Banking' | 'Credit' | 'Tax' | 'General';
+  category: GlossaryCategory;
+  categoryIcon: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  simpleOneLiner: string;
   definition: string;
   simpleExplanation: string;
   example: string;
+  explanations: {
+    beginner: string;
+    normal: string;
+    deepDive: string;
+  };
+  characterScenario: {
+    name: string;
+    avatar: string;
+    story: string;
+    takeaway: string;
+  };
+  visualDemo: {
+    type:
+      | 'inflation'
+      | 'compounding'
+      | 'diversification'
+      | 'stock'
+      | 'sip'
+      | 'repo-rate'
+      | 'bull-bear'
+      | 'cibil-score'
+      | 'emergency-fund'
+      | 'generic';
+    title: string;
+    subtitle: string;
+    explanation: string;
+  };
+  interactiveWidget: {
+    type:
+      | 'inflation-slider'
+      | 'compound-sandbox'
+      | 'diversify-basket'
+      | 'sip-planner'
+      | 'repo-toggle'
+      | 'cibil-simulator'
+      | 'budget-503020'
+      | 'generic';
+    title: string;
+    instruction: string;
+    defaultValues?: Record<string, number>;
+  };
+  quiz: {
+    question: string;
+    scenario: string;
+    options: { text: string; isCorrect: boolean; explanation: string }[];
+  };
+  stillConfused: string;
+  searchKeywords: string[];
+  relatedFeature?: {
+    label: string;
+    href: string;
+    iconName?: string;
+  };
   relatedLessonId?: string;
   relatedCalculator?: string;
+  order: number;
+  prerequisiteId?: string;
+}
+
+// Backward-compatible alias
+export type GlossaryTerm = PlayableConcept;
+
+export interface ConceptComparison {
+  id: string;
+  title: string;
+  badge: string;
+  conceptA: {
+    name: string;
+    tag: string;
+    description: string;
+    bestFor: string;
+    risk: string;
+    example: string;
+  };
+  conceptB: {
+    name: string;
+    tag: string;
+    description: string;
+    bestFor: string;
+    risk: string;
+    example: string;
+  };
+  verdict: string;
+}
+
+export interface DailyFinanceChallenge {
+  id: string;
+  title: string;
+  question: string;
+  context: string;
+  options: { id: string; text: string; isCorrect: boolean; explanation: string }[];
+  xpReward: number;
 }
 
 export interface MoneyMission {

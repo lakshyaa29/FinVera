@@ -1,22 +1,24 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Space_Grotesk, Inter } from 'next/font/google';
 import './globals.css';
 import { UserStateProvider } from '../context/UserStateContext';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'FinVera — The Duolingo of Investing & Financial Literacy',
+  title: 'FinVera — Master Money & Simulated Investing',
   description:
-    'Learn money. Build wealth. Understand how money works before you put it to work with progressive unlockable lessons, interactive financial calculators, and simulated investing.',
+    'Learn money by doing. Master cash flow, banking, credit, and investing with bite-sized lessons, interactive financial engines, and simulated portfolio practice.',
 };
 
 export default function RootLayout({
@@ -25,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}>
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
+    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-[#F8F8F3] text-[#171717] font-sans selection:bg-[#70E000] selection:text-[#171717]">
         <UserStateProvider>{children}</UserStateProvider>
       </body>
     </html>

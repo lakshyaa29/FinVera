@@ -1,337 +1,75 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
+import { ArrowRight, ArrowUpRight, BookOpen, Check, Clock3, Flame, Sparkles, TrendingUp, Calculator, Activity, Target, Wallet } from 'lucide-react';
 import { AppShell } from '../../components/layout/AppShell';
 import { useUserState } from '../../context/UserStateContext';
 import { ALL_LESSONS } from '../../data/lessonsData';
 import { AGE_CURRICULUM_DATA } from '../../data/ageCurriculumData';
-import { LEVELS_CONFIG, evaluateLevelUnlock } from '../../data/unlockRequirements';
+import { LEVELS_CONFIG } from '../../data/unlockRequirements';
 import { formatINR } from '../../lib/formatters';
-import {
-  Sparkles,
-  ArrowRight,
-  Flame,
-  Zap,
-  BookOpen,
-  Calculator,
-  TrendingUp,
-  Activity,
-  BookMarked,
-  CheckCircle2,
-  Lock,
-  ChevronRight,
-  User,
-} from 'lucide-react';
+
+const shortcuts = [
+  { href: '/calculators?type=sip', title: 'SIP calculator', description: 'Explore what monthly investing could look like.', icon: TrendingUp, color: 'var(--lime-light)' },
+  { href: '/calculators?type=emi', title: 'Loan EMI calculator', description: 'Understand your monthly loan payments.', icon: Calculator, color: 'var(--blue-light)' },
+  { href: '/calculators?type=savings-goal', title: 'Savings goal', description: 'Break a big goal into smaller monthly steps.', icon: Target, color: 'var(--yellow-light)' },
+  { href: '/health', title: 'Money health check', description: 'Find out which money habits to work on next.', icon: Activity, color: 'var(--coral-light)' },
+];
 
 export default function DashboardPage() {
-  const { profile, progress, portfolio, isLoaded } = useUserState();
-
-  // Find next uncompleted lesson
-  const nextLesson =
-    ALL_LESSONS.find((l) => !progress.completedLessonIds.includes(l.id)) || ALL_LESSONS[0];
-
-  // Age cohort configuration
+  const { profile, progress, portfolio } = useUserState();
+  const nextLesson = ALL_LESSONS.find((lesson) => !progress.completedLessonIds.includes(lesson.id));
+  const lesson = nextLesson || ALL_LESSONS[ALL_LESSONS.length - 1];
+  const level = LEVELS_CONFIG.find((item) => item.level === lesson.level) || LEVELS_CONFIG[0];
+  const levelLessons = ALL_LESSONS.filter((item) => item.level === lesson.level);
+  const completedInLevel = levelLessons.filter((item) => progress.completedLessonIds.includes(item.id)).length;
+  const completedCount = ALL_LESSONS.filter((item) => progress.completedLessonIds.includes(item.id)).length;
+  const percent = Math.round(completedInLevel / levelLessons.length * 100);
   const ageConfig = AGE_CURRICULUM_DATA[profile.ageGroup] || AGE_CURRICULUM_DATA['18-24'];
-
-  // Current Level info for the user's next lesson
-  const currentLevelConfig =
-    LEVELS_CONFIG.find((l) => l.level === nextLesson.level) || LEVELS_CONFIG[0];
-  const lessonsInCurrentLevel = ALL_LESSONS.filter((l) => l.level === nextLesson.level);
-  const completedInCurrentLevel = lessonsInCurrentLevel.filter((l) =>
-    progress.completedLessonIds.includes(l.id)
-  ).length;
+  const invested = Object.values(portfolio.holdings).reduce((total, holding) => total + holding.units * holding.avgBuyPrice, 0);
+  const total = portfolio.virtualCash + invested;
+  const cashPercent = total > 0 ? Math.min(100, Math.max(0, portfolio.virtualCash / total * 100)) : 0;
 
   return (
     <AppShell>
-      <div className="space-y-8 animate-in fade-in duration-200">
-        {/* Top Greeting Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="space-y-7 pb-6">
+        <div className="dashboard-heading flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div><span className="eyebrow text-[#6B6B6B] mb-2">Your learning space</span><h1>A little wiser, every day.<br className="sm:hidden" /> Welcome, {profile.name || 'learner'}.</h1><p>Pick up where you left off. Your next small step is ready.</p></div>
+        </div>
+
+        <div className="dashboard-stats">
+          <div className="stat-card"><span><BookOpen size={15} /> Lessons completed</span><strong>{completedCount} <small>of {ALL_LESSONS.length} lessons</small></strong></div>
+          <div className="stat-card"><span><Flame size={15} /> Learning streak</span><strong>{progress.streakDays} <small>{progress.streakDays === 1 ? 'day' : 'days'} in a row</small></strong></div>
+          <div className="stat-card"><span><Sparkles size={15} /> Experience earned</span><strong>{progress.xp} <small>XP · {progress.levelTitle}</small></strong></div>
+        </div>
+
+        <section className="lesson-feature" aria-labelledby="next-lesson-heading">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Good day, {profile.name}!
-              </h1>
-              <span className="text-xl">👋</span>
+            <div className="flex flex-wrap items-center gap-3"><span className="nb-tag bg-white">{nextLesson ? 'Your next lesson' : 'Learning path complete'}</span><span className="text-xs font-medium text-[#575e4f]">Level {lesson.level} · {level.name}</span></div>
+            <h2 id="next-lesson-heading">{nextLesson ? lesson.title : 'Look how far you’ve come.'}</h2>
+            <p>{nextLesson ? lesson.shortDescription : 'You’ve completed every lesson. Revisit a favourite or put your knowledge into practice.'}</p>
+            <div className="flex flex-wrap items-center gap-4 mt-5 text-xs font-semibold"><span className="flex items-center gap-1.5"><Clock3 size={14} /> {lesson.estimatedMinutes} min lesson</span><span className="flex items-center gap-1.5"><Sparkles size={14} /> {nextLesson ? `Earn ${lesson.xpReward} XP` : 'Ready to review'}</span></div>
+            <div className="max-w-lg mt-6">
+              <div className="flex justify-between gap-3 text-xs mb-2"><span>Level {lesson.level} progress</span><span className="font-semibold">{completedInLevel} of {levelLessons.length} lessons</span></div>
+              <div role="progressbar" aria-label={`Level ${lesson.level} completion`} aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} className="h-2.5 rounded-full bg-white border border-[#171717] overflow-hidden"><div style={{ width: `${percent}%` }} className="h-full bg-[#70E000] border-r border-[#171717]" /></div>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Welcome back to your financial mastery path.
-            </p>
           </div>
+          <div className="lesson-feature-aside"><div className="lesson-illustration" aria-hidden="true"><BookOpen size={38} strokeWidth={1.5} /></div><Link href={`/learn/${lesson.id}`} className="nb-btn nb-btn-primary w-full">{nextLesson ? 'Continue lesson' : 'Review lesson'} <ArrowRight size={16} /></Link><Link href="/learn" className="text-xs font-semibold underline underline-offset-4">View your learning path</Link></div>
+        </section>
 
-          {/* Top Quick Badges */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs">
-              <Flame className="w-4 h-4 fill-amber-400 animate-pulse" />
-              <span>{progress.streakDays} Day Streak</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs">
-              <Zap className="w-4 h-4 fill-emerald-400" />
-              <span>{progress.xp} XP</span>
-            </div>
-          </div>
+        <div className="grid xl:grid-cols-2 gap-6">
+          <section className="dashboard-panel flex flex-col" aria-labelledby="portfolio-heading">
+            <div className="panel-heading"><h2 id="portfolio-heading">Your practice portfolio</h2><span className="text-[11px] px-2 py-1 rounded-md bg-[#F5F0FF] border border-[#ded5ed]">Virtual money</span></div>
+            <div className="flex items-center gap-3"><span className="feature-icon bg-[#F0FDD4]"><Wallet size={22} /></span><div><p className="text-xs text-[#6B6B6B]">Cash + amount invested</p><p className="font-display text-3xl font-bold tracking-tight">{formatINR(total)}</p></div></div>
+            <p className="text-sm text-[#6B6B6B] mt-5 leading-relaxed">{invested === 0 ? 'Your practice money is ready. Explore an investment and see how a portfolio works, without risking real money.' : 'Keep exploring and learning. This summary shows your holdings at their purchase cost.'}</p>
+            <div className="mt-6 mb-2 h-3 rounded-full border border-[#171717] bg-[#B99CFF] overflow-hidden" role="img" aria-label={`Available cash ${formatINR(portfolio.virtualCash)}, invested at cost ${formatINR(invested)}`}><div style={{ width: `${cashPercent}%` }} className="h-full bg-[#b8e98b]" /></div>
+            <div className="flex flex-wrap justify-between gap-2 text-xs mb-6"><span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#b8e98b] border border-[#171717]" />Cash: {formatINR(portfolio.virtualCash)}</span><span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#B99CFF] border border-[#171717]" />Invested: {formatINR(invested)}</span></div>
+            <Link href="/practice" className="nb-btn nb-btn-secondary w-full mt-auto">Explore the simulator <ArrowUpRight size={17} /></Link>
+          </section>
+          <section className="dashboard-panel" aria-labelledby="tools-heading"><div className="panel-heading"><h2 id="tools-heading">Make it practical</h2><Link href="/calculators">All calculators</Link></div>{shortcuts.map((item) => <Link href={item.href} className="tool-shortcut" key={item.href}><span className="feature-icon" style={{ background: item.color }}><item.icon size={20} /></span><div className="flex-1"><h3>{item.title}</h3><p>{item.description}</p></div><ArrowUpRight size={16} className="shrink-0" /></Link>)}</section>
         </div>
 
-        {/* 1. AGE-BASED PERSONALIZATION CARD */}
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                  Your FinVera Journey
-                </span>
-                <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-semibold">
-                  Personalized for ages {profile.ageGroup}
-                </span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mt-1">
-                {ageConfig.title}
-              </h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-xl">
-                {ageConfig.tagline} Based on your age group, we&apos;ve prioritized these core topics for you.
-              </p>
-            </div>
-
-            <Link
-              href="/profile"
-              className="text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors self-start md:self-auto shrink-0 flex items-center gap-1.5"
-            >
-              <User className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Change Age in Settings</span>
-            </Link>
-          </div>
-
-          {/* Prioritized Topics Pills */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
-            {ageConfig.focusTopics.map((topic) => (
-              <span
-                key={topic}
-                className="text-xs px-3 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-slate-300 font-medium"
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-3 text-[10px] text-slate-500 italic">
-            * {ageConfig.disclaimer}
-          </div>
-        </div>
-
-        {/* 2. CONTINUE LEARNING MAIN ACTION CARD */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Continue Learning Card */}
-          <div className="lg:col-span-8 p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-teal-950/30 border border-teal-500/30 shadow-xl flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-teal-400 font-mono">
-                  Continue Your Journey
-                </span>
-                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  +{nextLesson.xpReward} XP
-                </span>
-              </div>
-
-              <div className="text-xs text-slate-400 mb-1 flex items-center gap-1.5">
-                <span>Current Section:</span>
-                <span className="font-semibold text-slate-200">{currentLevelConfig.name}</span>
-                <span className="text-slate-600">•</span>
-                <span>
-                  {completedInCurrentLevel} / {lessonsInCurrentLevel.length} Lessons
-                </span>
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1 mb-2">
-                {nextLesson.title}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
-                {nextLesson.shortDescription}
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="text-xs text-slate-400">
-                  Estimated: <span className="font-mono text-white">{nextLesson.estimatedMinutes} mins</span>
-                </div>
-                <span className="text-slate-700">•</span>
-                <div className="text-xs text-slate-400">
-                  Concept: <span className="text-teal-300 font-medium">{nextLesson.concept}</span>
-                </div>
-              </div>
-
-              <Link
-                href={`/learn/${nextLesson.id}`}
-                className="px-6 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                <span>Continue Learning</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Today's Concept Card */}
-          <div className="lg:col-span-4 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col justify-between">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
-                Today&apos;s Concept
-              </span>
-              <h3 className="text-lg font-bold text-white mt-2 mb-1.5">
-                The Power of Compounding
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                &quot;Compound interest is the eighth wonder of the world. He who understands it,
-                earns it; he who doesn&apos;t, pays it.&quot;
-              </p>
-
-              <div className="mt-4 p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300">
-                <p className="text-slate-400 text-[11px] mb-1">Rule of 72 Quick Tip:</p>
-                Divide 72 by your annual expected return to estimate how many years it takes your
-                money to double.
-              </div>
-            </div>
-
-            <Link
-              href="/calculators?type=compound-interest"
-              className="mt-5 w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 transition-colors flex items-center justify-center gap-1.5"
-            >
-              <span>Launch Calculator</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-
-        {/* 3. YOUR JOURNEY ROADMAP PROGRESS OVERVIEW */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-xl">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Your Learning Journey</h3>
-              <p className="text-xs text-slate-400">
-                Complete lessons to progressively unlock higher financial tiers.
-              </p>
-            </div>
-            <Link
-              href="/learn"
-              className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
-            >
-              <span>View Full Roadmap</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {LEVELS_CONFIG.map((lvl) => {
-              const unlockState = evaluateLevelUnlock(
-                lvl.level,
-                progress.completedLessonIds,
-                ALL_LESSONS
-              );
-              const isComplete =
-                unlockState.completedInThisLevel === unlockState.totalInThisLevel &&
-                unlockState.totalInThisLevel > 0;
-
-              return (
-                <div
-                  key={lvl.level}
-                  className={`p-4 rounded-2xl border transition-all ${
-                    unlockState.isUnlocked
-                      ? 'bg-slate-950/70 border-slate-800'
-                      : 'bg-slate-950/30 border-slate-900 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{lvl.icon}</span>
-                      <span className="text-xs font-bold text-slate-200">{lvl.name}</span>
-                    </div>
-
-                    {isComplete ? (
-                      <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Done
-                      </span>
-                    ) : unlockState.isUnlocked ? (
-                      <span className="text-teal-400 text-xs font-mono font-bold">
-                        {unlockState.progressPercent}%
-                      </span>
-                    ) : (
-                      <span className="text-slate-500 text-xs font-medium flex items-center gap-1">
-                        <Lock className="w-3 h-3 text-slate-500" />
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Progress bar or lock message */}
-                  {unlockState.isUnlocked ? (
-                    <div>
-                      <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-1.5">
-                        <div
-                          style={{ width: `${unlockState.progressPercent}%` }}
-                          className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full"
-                        />
-                      </div>
-                      <p className="text-[11px] text-slate-400">
-                        {unlockState.completedInThisLevel} of {unlockState.totalInThisLevel} Lessons completed
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-amber-400 font-medium">
-                      🔒 Complete {unlockState.remainingLessons} more lessons to unlock
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 4. QUICK ACTIONS HUB */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Link
-            href="/calculators"
-            className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Calculator className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-white">Calculators</h4>
-            <p className="text-xs text-slate-400 mt-0.5">5 interactive tools</p>
-          </Link>
-
-          <Link
-            href="/practice"
-            className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-white">Virtual Trading</h4>
-            <p className="text-xs text-slate-400 mt-0.5">{formatINR(portfolio.virtualCash)} Cash</p>
-          </Link>
-
-          <Link
-            href="/glossary"
-            className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <BookMarked className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-white">Glossary</h4>
-            <p className="text-xs text-slate-400 mt-0.5">25+ simple definitions</p>
-          </Link>
-
-          <Link
-            href="/health"
-            className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Activity className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-white">Money Health</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Confidence checkup</p>
-          </Link>
-        </div>
+        <section className="rounded-xl border border-[#dcd3eb] bg-[#F5F0FF] p-5 sm:p-6 flex flex-col sm:flex-row justify-between gap-5" aria-labelledby="track-heading"><div><span className="eyebrow text-[#655578]">Learning that fits your life</span><h2 id="track-heading" className="font-display text-xl font-bold mt-2">{ageConfig.title}</h2><p className="text-sm text-[#655578] mt-1">{ageConfig.tagline}</p><div className="flex flex-wrap gap-x-4 gap-y-2 mt-4">{ageConfig.focusTopics.slice(0, 3).map((topic) => <span key={topic} className="text-xs flex items-center gap-1.5"><Check size={13} />{topic}</span>)}</div></div><Link href="/profile" className="text-sm font-semibold underline underline-offset-4 shrink-0 self-start">Adjust your track</Link></section>
       </div>
     </AppShell>
   );

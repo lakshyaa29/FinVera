@@ -9,37 +9,37 @@ import { SipCalculator } from '../../components/calculators/SipCalculator';
 import { InflationCalculator } from '../../components/calculators/InflationCalculator';
 import { EmiCalculator } from '../../components/calculators/EmiCalculator';
 import { SavingsGoalCalc } from '../../components/calculators/SavingsGoalCalc';
-import { Calculator, TrendingUp, DollarSign, Percent, ShieldAlert, Target } from 'lucide-react';
+import { Calculator, TrendingUp, IndianRupee, Percent, Target, Sparkles } from 'lucide-react';
 
 const CALC_TABS = [
   {
     id: 'compound-interest',
-    title: 'Compound Interest',
-    desc: 'Exponential growth over time',
+    title: 'Compound Growth',
+    desc: 'See how savings grow over time',
     icon: TrendingUp,
   },
   {
     id: 'sip',
-    title: 'SIP Calculator',
-    desc: 'Monthly mutual fund compounding',
-    icon: DollarSign,
+    title: 'Monthly SIP',
+    desc: 'Explore regular monthly investing',
+    icon: IndianRupee,
   },
   {
     id: 'inflation',
-    title: 'Inflation & Purchasing Power',
-    desc: 'Cost of living erosion math',
+    title: 'Inflation',
+    desc: 'Understand changing prices',
     icon: Percent,
   },
   {
     id: 'emi',
     title: 'Loan EMI & Interest',
-    desc: 'Amortization & debt payoffs',
+    desc: 'Estimate monthly loan payments',
     icon: Calculator,
   },
   {
     id: 'savings-goal',
-    title: 'Savings Goal Planner',
-    desc: 'Target milestone budgeting',
+    title: 'Savings Goal',
+    desc: 'Plan how to reach your target',
     icon: Target,
   },
 ];
@@ -47,7 +47,7 @@ const CALC_TABS = [
 function CalculatorsContent() {
   const searchParams = useSearchParams();
   const initialType = searchParams.get('type') || 'compound-interest';
-  const [activeTab, setActiveTab] = useState<string>(initialType);
+  const [activeTab, setActiveTab] = useState<string>(CALC_TABS.some((tab) => tab.id === initialType) ? initialType : 'compound-interest');
   const { exploreCalculator } = useUserState();
 
   useEffect(() => {
@@ -61,25 +61,25 @@ function CalculatorsContent() {
   }, [activeTab, exploreCalculator]);
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping" />
-          <span className="text-xs font-bold uppercase tracking-wider text-teal-400 font-mono">
-            Interactive Financial Engines
+        <div className="flex items-center gap-2 mb-2">
+          <span className="nb-sticker bg-[#FFD84D] text-[#171717]">
+            <Sparkles className="w-3.5 h-3.5 text-[#171717]" />
+            TRY THE POSSIBILITIES
           </span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white mt-1 tracking-tight">
-          Financial Calculator Center
+        <h1 className="text-3xl sm:text-4xl font-black font-space-grotesk text-[#171717] tracking-tight">
+          Make your money plans clearer
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Accurate, instant mathematical simulations tailored with Indian Rupee (₹) formatting.
+        <p className="text-sm font-medium text-[#171717]/75 mt-1 max-w-2xl">
+          Choose a calculator, adjust the numbers, and see what changes. Explore savings, investments, and loans in rupees.
         </p>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800">
+      <div aria-label="Choose a calculator" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {CALC_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -88,21 +88,24 @@ function CalculatorsContent() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              aria-pressed={isActive}
+              aria-controls="calculator-content"
+              className={`py-4 px-3 rounded-xl text-sm font-semibold transition-all flex flex-col items-start justify-start gap-2 cursor-pointer text-left border ${
                 isActive
-                  ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'bg-[#F0FDD4] border-[#171717] text-[#171717] shadow-[3px_3px_0px_#171717]'
+                  : 'bg-[#FFFFFF] border-[#d6d6cc] text-[#171717] hover:bg-[#FFF9E0]'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`} />
-              <span>{tab.title}</span>
+              <Icon className={`w-4 h-4 ${isActive ? 'text-[#171717]' : 'text-[#171717]/70'}`} />
+              <span className="font-space-grotesk tracking-tight leading-tight">{tab.title}</span>
+              <span className="text-xs font-normal text-[#6B6B6B] leading-relaxed">{tab.desc}</span>
             </button>
           );
         })}
       </div>
 
       {/* Active Calculator Component */}
-      <div className="animate-in fade-in duration-200">
+      <div id="calculator-content" className="animate-in fade-in duration-200">
         {activeTab === 'compound-interest' && <CompoundInterestCalc />}
         {activeTab === 'sip' && <SipCalculator />}
         {activeTab === 'inflation' && <InflationCalculator />}
@@ -118,8 +121,8 @@ export default function CalculatorsPage() {
     <AppShell>
       <Suspense
         fallback={
-          <div className="p-8 text-center text-slate-400 text-sm">
-            Loading Calculator Center...
+          <div className="p-12 text-center text-slate-400 text-sm">
+            Loading Calculator Suite...
           </div>
         }
       >

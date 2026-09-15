@@ -9,16 +9,8 @@ import { PortfolioSummary } from '../../components/simulator/PortfolioSummary';
 import { HoldingsTable } from '../../components/simulator/HoldingsTable';
 import { TradeModal } from '../../components/simulator/TradeModal';
 import { formatINR } from '../../lib/formatters';
-import {
-  TrendingUp,
-  Target,
-  Sparkles,
-  ShieldAlert,
-  ArrowRight,
-  Plus,
-  Minus,
-  CheckCircle2,
-} from 'lucide-react';
+import { Target, ArrowRight, Plus, Minus, Check } from 'lucide-react';
+import { AssetTypeIcon } from '../../components/graphics/FinVeraGraphics';
 
 export default function PracticePage() {
   const { portfolio, buyAsset, sellAsset } = useUserState();
@@ -57,39 +49,35 @@ export default function PracticePage() {
 
   return (
     <AppShell>
-      <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="space-y-8 max-w-6xl mx-auto pb-12">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b-2 border-[#171717]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                Hands-On Practice Sandbox
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white mt-1 tracking-tight">
-              Simulated Investing & Missions
+            <span className="nb-tag bg-[#70E000] text-[#171717] mb-2">
+              SIMULATED INVESTING PLAYGROUND
+            </span>
+            <h1 className="font-display font-black text-3xl sm:text-4xl text-[#171717] tracking-tight">
+              Your investing playground
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Test your investment skills with ₹1,00,000 in virtual funds and real-life scenario
-              missions.
+            <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+              Try investing with ₹1,00,000 in virtual money. Explore assets, make practice trades, and learn as you go.
             </p>
           </div>
 
           <Link
             href="/practice/missions"
-            className="self-start sm:self-auto px-4 py-2 rounded-xl bg-purple-500/15 text-purple-300 border border-purple-500/30 text-xs font-bold hover:bg-purple-500/25 transition-colors flex items-center gap-2"
+            className="nb-btn nb-btn-yellow text-xs self-start sm:self-auto py-2.5 px-4"
           >
-            <Target className="w-4 h-4 text-purple-400" />
-            <span>View Real-Life Money Missions</span>
+            <Target className="w-4 h-4 text-[#171717]" />
+            <span>Money Missions</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         {/* Feedback Alert if trade executed */}
         {feedbackMessage && (
-          <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in duration-150">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-lg bg-[#70E000] border-2 border-[#171717] text-[#171717] text-xs font-display font-black flex items-center gap-2 shadow-[3px_3px_0px_#171717]">
+            <Check className="w-4 h-4 stroke-[3]" />
             <span>{feedbackMessage}</span>
           </div>
         )}
@@ -105,15 +93,15 @@ export default function PracticePage() {
         />
 
         {/* 3. Market Assets Catalog */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="bg-[#FFFFFF] border-3 border-[#171717] rounded-xl p-6 sm:p-7 shadow-[4px_4px_0px_#171717] space-y-5">
+          <div className="flex items-center justify-between pb-3.5 border-b-2 border-[#171717]">
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Explore Market Assets</h3>
-              <p className="text-xs text-slate-400">
-                Simulated Indian equities, index funds, commodities, and government bonds.
+              <h3 className="font-display font-black text-xl text-[#171717]">MARKET ASSET CATALOG</h3>
+              <p className="text-xs text-[#6B6B6B] font-medium">
+                Simulated Indian equities, sovereign gold bonds, and index funds with live price math.
               </p>
             </div>
-            <span className="text-xs font-mono font-bold text-teal-400">
+            <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-[#FFD84D] border-2 border-[#171717]">
               {SIMULATED_ASSETS.length} Assets
             </span>
           </div>
@@ -122,52 +110,63 @@ export default function PracticePage() {
             {SIMULATED_ASSETS.map((asset) => {
               const holding = portfolio.holdings[asset.id];
               const isProfit = asset.changePercent >= 0;
+              const assetIconType =
+                asset.category.toLowerCase().includes('gold')
+                  ? 'gold'
+                  : asset.category.toLowerCase().includes('debt')
+                  ? 'debt'
+                  : asset.category.toLowerCase().includes('etf') || asset.category.toLowerCase().includes('index')
+                  ? 'etf'
+                  : 'equity';
 
               return (
                 <div
                   key={asset.id}
-                  className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between"
+                  className="p-5 rounded-lg bg-[#FAFAF7] border-2 border-[#171717] hover:bg-[#FFFFFF] shadow-[3px_3px_0px_#171717] hover:shadow-[5px_5px_0px_#171717] transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <span className="text-xs font-extrabold text-white font-mono">
-                          {asset.symbol}
-                        </span>
-                        <h4 className="text-xs text-slate-300 font-medium line-clamp-1">
-                          {asset.name}
-                        </h4>
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <AssetTypeIcon type={assetIconType} />
+                        <div>
+                          <span className="font-display font-black text-sm text-[#171717]">
+                            {asset.symbol}
+                          </span>
+                          <h4 className="text-xs text-[#6B6B6B] font-bold line-clamp-1">
+                            {asset.name}
+                          </h4>
+                        </div>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#FFFFFF] border border-[#171717] text-[#171717]">
                         {asset.category}
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-3">
+                    <p className="text-xs text-[#6B6B6B] leading-relaxed line-clamp-2 mb-3 font-medium">
                       {asset.description}
                     </p>
 
-                    <div className="flex items-baseline justify-between pt-2 border-t border-slate-800/80 mb-3 font-mono">
+                    <div className="flex items-baseline justify-between pt-2.5 border-t-2 border-[#171717]/20 mb-3 font-mono">
                       <div>
-                        <span className="text-base font-extrabold text-white">
+                        <span className="text-lg font-black text-[#171717]">
                           {formatINR(asset.currentPrice)}
                         </span>
                         <span
-                          className={`text-xs ml-2 font-semibold ${
-                            isProfit ? 'text-emerald-400' : 'text-rose-400'
+                          className={`text-xs ml-2 font-black ${
+                            isProfit ? 'text-[#171717]' : 'text-[#FF6B6B]'
                           }`}
                         >
-                          {isProfit ? '+' : ''}
+                          {isProfit ? '▲ +' : '▼ '}
                           {asset.changePercent}%
                         </span>
                       </div>
-                      <span className="text-[11px] text-slate-500">{asset.navOrPe}</span>
+                      <span className="text-[11px] text-[#6B6B6B] font-bold">{asset.navOrPe}</span>
                     </div>
 
                     {holding && holding.units > 0 && (
-                      <div className="mb-3 text-[11px] text-teal-300 bg-teal-950/40 px-2.5 py-1 rounded-lg border border-teal-500/20 flex justify-between">
+                      <div className="mb-3 text-[11px] text-[#171717] bg-[#70E000] px-2.5 py-1 rounded border-2 border-[#171717] flex justify-between font-bold">
                         <span>Owned:</span>
-                        <span className="font-mono font-bold">{holding.units} units</span>
+                        <span className="font-mono">{holding.units} units</span>
                       </div>
                     )}
                   </div>
@@ -176,18 +175,18 @@ export default function PracticePage() {
                   <div className="flex items-center gap-2 pt-2">
                     <button
                       onClick={() => handleOpenTrade(asset.id, 'BUY')}
-                      className="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 px-3 rounded bg-[#70E000] text-[#171717] border-2 border-[#171717] font-display font-bold text-xs shadow-[2px_2px_0px_#171717] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#171717] transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
                       <span>Buy</span>
                     </button>
 
                     {holding && holding.units > 0 && (
                       <button
                         onClick={() => handleOpenTrade(asset.id, 'SELL')}
-                        className="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-all flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 px-3 rounded bg-[#FF6B6B] text-[#171717] border-2 border-[#171717] font-display font-bold text-xs shadow-[2px_2px_0px_#171717] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#171717] transition-all flex items-center justify-center gap-1 cursor-pointer"
                       >
-                        <Minus className="w-3.5 h-3.5" />
+                        <Minus className="w-3.5 h-3.5 stroke-[3]" />
                         <span>Sell</span>
                       </button>
                     )}

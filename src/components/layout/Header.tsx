@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Flame, Zap, ShieldAlert, Sparkles } from 'lucide-react';
+import { Search, Flame } from 'lucide-react';
 import { useUserState } from '../../context/UserStateContext';
 import { GlobalSearchModal } from './GlobalSearchModal';
 
@@ -10,77 +10,29 @@ export function Header() {
   const { progress, profile } = useUserState();
   const [searchOpen, setSearchOpen] = useState(false);
 
+  useEffect(() => {
+    const openSearch = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', openSearch);
+    return () => window.removeEventListener('keydown', openSearch);
+  }, []);
+
   return (
     <>
-      <header className="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
-        {/* Mobile Brand / Search Button */}
-        <div className="flex items-center gap-3">
-          <div className="lg:hidden flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center font-bold text-slate-950 text-sm">
-              ₹
-            </div>
-            <span className="font-extrabold text-base text-white tracking-tight">FINVERA</span>
-          </div>
-
-          {/* Search Trigger Button */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 text-xs transition-colors shadow-sm"
-          >
-            <Search className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Search topics, SIP, EMI, lessons...</span>
-            <kbd className="ml-4 px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-slate-800 rounded border border-slate-700">
-              Ctrl K
-            </kbd>
-          </button>
-        </div>
-
-        {/* Right Status Actions: Streak, XP, Age Group, Profile */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Mobile search icon */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="sm:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-
-          {/* Streak Indicator */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-bold">
-            <Flame className="w-4 h-4 fill-amber-400 animate-pulse" />
-            <span>{progress.streakDays}</span>
-            <span className="hidden sm:inline font-normal text-amber-500/80">days</span>
-          </div>
-
-          {/* XP Pill */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold">
-            <Zap className="w-3.5 h-3.5 fill-emerald-400" />
-            <span>{progress.xp}</span>
-            <span className="hidden sm:inline font-normal text-emerald-500/80">XP</span>
-          </div>
-
-          {/* Age Cohort Pill */}
-          <Link
-            href="/profile"
-            className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-medium hover:border-slate-700 transition-colors"
-          >
-            <span className="text-slate-500 text-[10px] uppercase font-semibold">Age</span>
-            <span className="text-emerald-400 font-bold">{profile.ageGroup}</span>
-          </Link>
-
-          {/* Profile Circle */}
-          <Link
-            href="/profile"
-            className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center font-bold text-slate-950 text-xs shadow hover:scale-105 transition-transform"
-            title="View Profile & Settings"
-          >
-            {profile.name ? profile.name[0].toUpperCase() : 'U'}
-          </Link>
+      <header className="h-[76px] shrink-0 border-b border-[#dcdcd2] bg-[#FAFAF7] px-5 sm:px-8 lg:px-10 flex items-center justify-between gap-4 z-30">
+        <div className="lg:hidden"><Link href="/dashboard" className="brand-lockup" aria-label="FinVera dashboard"><span className="brand-mark">₹</span><span className="font-display font-bold text-base hidden min-[400px]:inline">FINVERA</span></Link></div>
+        <button onClick={() => setSearchOpen(true)} className="hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white border border-[#d6d6ca] hover:border-[#171717] text-sm transition-colors cursor-pointer w-full max-w-sm text-left" aria-label="Search lessons, concepts, and calculators"><Search size={17} className="text-[#6B6B6B] shrink-0" /><span className="text-[#6B6B6B] flex-1">What would you like to learn?</span><kbd className="text-[10px] rounded border border-[#deded4] bg-[#F8F8F3] px-1.5 py-0.5 whitespace-nowrap">Ctrl K</kbd></button>
+        <div className="flex items-center gap-3 sm:gap-5">
+          <button onClick={() => setSearchOpen(true)} className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg border border-[#d6d6ca] bg-white cursor-pointer" aria-label="Search"><Search size={19} /></button>
+          <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[#595952]" title="Consecutive days of learning"><Flame size={17} className="text-[#8b601b]" />{progress.streakDays}-day streak</div>
+          <span className="hidden xl:inline text-xs text-[#6B6B6B]">Small steps add up.</span>
+          <Link href="/profile" aria-label="Your profile and settings" className="w-10 h-10 rounded-xl bg-[#e6ddf4] border border-[#171717] shadow-[2px_2px_0_#171717] flex items-center justify-center font-display font-bold text-[#171717] hover:bg-[#d9c9ef] transition-colors">{profile.name ? profile.name[0].toUpperCase() : 'U'}</Link>
         </div>
       </header>
-
-      {/* Global Search Modal */}
       <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

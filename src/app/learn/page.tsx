@@ -6,7 +6,7 @@ import { useUserState } from '../../context/UserStateContext';
 import { ALL_LESSONS } from '../../data/lessonsData';
 import { LEVELS_CONFIG } from '../../data/unlockRequirements';
 import { RoadmapLevelNode } from '../../components/roadmap/RoadmapLevelNode';
-import { BookOpen, Zap, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
+import { GrowthPathMotif } from '../../components/graphics/FinVeraGraphics';
 
 export default function LearnRoadmapPage() {
   const { progress } = useUserState();
@@ -17,70 +17,72 @@ export default function LearnRoadmapPage() {
 
   return (
     <AppShell>
-      <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="space-y-8 max-w-4xl mx-auto pb-12">
         {/* Roadmap Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b-2 border-[#171717]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                The Learning Path
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1 tracking-tight">
-              Financial Literacy Roadmap
+            <span className="nb-tag bg-[#70E000] text-[#171717] mb-2">
+              ONE STEP AT A TIME
+            </span>
+            <h1 className="font-display font-black text-3xl sm:text-4xl text-[#171717] tracking-tight">
+              Your money learning path
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Follow the sequential journey. Complete foundational lessons to progressively unlock
-              advanced investing.
+            <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+              Start with everyday money skills. Complete lessons to unlock the next level and build your confidence.
             </p>
           </div>
 
           {/* Quick Metrics */}
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-center min-w-[100px]">
-              <p className="text-[11px] text-slate-400 font-medium">Completed</p>
-              <p className="text-base font-extrabold text-emerald-400 font-mono">
-                {completedCount} / {totalLessons}
+            <div className="px-4 py-2.5 rounded-lg bg-[#FFFFFF] border-2 border-[#171717] text-center min-w-[110px] shadow-[3px_3px_0px_#171717]">
+              <p className="font-mono text-[10px] text-[#6B6B6B] uppercase font-bold">Progress</p>
+              <p className="font-display font-black text-lg text-[#171717]">
+                {completedCount} <span className="text-xs text-[#6B6B6B]">/ {totalLessons}</span>
               </p>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-center min-w-[100px]">
-              <p className="text-[11px] text-slate-400 font-medium">XP Available</p>
-              <p className="text-base font-extrabold text-teal-400 font-mono">
+            <div className="px-4 py-2.5 rounded-lg bg-[#70E000] border-2 border-[#171717] text-center min-w-[110px] shadow-[3px_3px_0px_#171717]">
+              <p className="font-mono text-[10px] text-[#171717] uppercase font-bold">XP to discover</p>
+              <p className="font-display font-black text-lg text-[#171717]">
                 +{totalXpAvailable} XP
               </p>
             </div>
           </div>
         </div>
 
-        {/* Unlock Rules Explainer Banner */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 flex items-start gap-3 text-xs text-slate-300">
-          <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <span className="font-bold text-white">How Progressive Unlocking Works: </span>
-            Level 1 (Money Basics) is unlocked immediately. Completing 2 lessons unlocks Level 2
-            (Saving). Completing 4 total lessons unlocks Level 3 (Banking), and continuing through
-            Credit, Investing, and Wealth Building.
+        {/* Growth Path brand motif banner */}
+        <div className="bg-[#FFFFFF] border-3 border-[#171717] rounded-xl p-4 shadow-[4px_4px_0px_#171717] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-xs font-display font-bold text-[#171717]">
+            <span className="bg-[#FFD84D] px-2 py-0.5 border border-[#171717] rounded mr-2">
+              HOW IT WORKS
+            </span>
+            Finish the lessons in each level to open up the next part of your path.
           </div>
+          <GrowthPathMotif className="w-48 h-5 shrink-0" />
         </div>
 
         {/* Roadmap Nodes List (Levels 1 to 6) */}
-        <div className="space-y-6">
-          {LEVELS_CONFIG.map((lvl) => {
+        <div className="space-y-6 relative">
+          {LEVELS_CONFIG.map((lvl, index) => {
             const levelLessons = ALL_LESSONS.filter((l) => l.level === lvl.level);
 
             return (
-              <RoadmapLevelNode
-                key={lvl.level}
-                levelNumber={lvl.level}
-                levelTitle={lvl.name}
-                badge={lvl.badge}
-                icon={lvl.icon}
-                description={lvl.description}
-                lessons={levelLessons}
-                completedLessonIds={progress.completedLessonIds}
-                allLessons={ALL_LESSONS}
-              />
+              <div key={lvl.level} className="relative">
+                {/* Thick black connecting line between levels */}
+                {index < LEVELS_CONFIG.length - 1 && (
+                  <div className="hidden sm:block absolute left-9 top-full h-6 w-1 bg-[#171717] z-10 -ml-0.5" />
+                )}
+
+                <RoadmapLevelNode
+                  levelNumber={lvl.level}
+                  levelTitle={lvl.name}
+                  badge={lvl.badge}
+                  icon={lvl.icon}
+                  description={lvl.description}
+                  lessons={levelLessons}
+                  completedLessonIds={progress.completedLessonIds}
+                  allLessons={ALL_LESSONS}
+                />
+              </div>
             );
           })}
         </div>

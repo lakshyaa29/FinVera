@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { QuizQuestion } from '../../types';
-import { CheckCircle2, XCircle, ArrowRight, HelpCircle, Award } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface QuizComponentProps {
   questions: QuizQuestion[];
@@ -29,7 +29,6 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
 
   const handleNext = () => {
     if (isLastQuestion) {
-      // Finished all questions
       const finalAnswers = [...userAnswers];
       const allPassed = questions.every((q, idx) => finalAnswers[idx] === q.correctIndex);
       onComplete(allPassed);
@@ -41,32 +40,29 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl">
+    <div className="bg-[#FFFFFF] border-3 border-[#171717] rounded-xl p-6 sm:p-7 shadow-[5px_5px_0px_#171717]">
       {/* Quiz Progress Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold text-xs">
-            <Award className="w-4 h-4" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-white tracking-tight">Knowledge Check</h4>
-            <p className="text-xs text-slate-400">
-              Question {currentIndex + 1} of {questions.length}
-            </p>
-          </div>
+      <div className="flex items-center justify-between pb-4 border-b-2 border-[#171717] mb-6">
+        <div>
+          <span className="nb-tag bg-[#FFD84D] text-[#171717] mb-1">
+            KNOWLEDGE CHECK
+          </span>
+          <h4 className="font-display font-black text-lg text-[#171717]">
+            QUESTION {currentIndex + 1} OF {questions.length}
+          </h4>
         </div>
 
-        {/* Step indicator pills */}
+        {/* Step Indicator Pills */}
         <div className="flex items-center gap-1.5">
           {questions.map((_, idx) => (
             <span
               key={idx}
-              className={`w-2.5 h-2.5 rounded-full transition-all ${
+              className={`w-3 h-3 rounded border-2 border-[#171717] transition-all ${
                 idx === currentIndex
-                  ? 'bg-emerald-400 scale-125'
+                  ? 'bg-[#70E000] scale-110 shadow-[1px_1px_0px_#171717]'
                   : idx < currentIndex
-                  ? 'bg-emerald-600'
-                  : 'bg-slate-800'
+                  ? 'bg-[#171717]'
+                  : 'bg-[#E5E5DE]'
               }`}
             />
           ))}
@@ -74,7 +70,7 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
       </div>
 
       {/* Question Text */}
-      <h3 className="text-base sm:text-lg font-bold text-slate-100 mb-5 leading-snug">
+      <h3 className="font-display font-black text-lg sm:text-xl text-[#171717] mb-6 leading-snug">
         {currentQ.question}
       </h3>
 
@@ -82,18 +78,18 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
       <div className="space-y-3 mb-6">
         {currentQ.options.map((option, idx) => {
           const isSelected = selectedOption === idx;
-          let buttonStyle = 'bg-slate-950/70 border-slate-800 text-slate-200 hover:border-slate-700 hover:bg-slate-800/60';
+          let buttonClass = 'bg-[#FFFFFF] hover:bg-[#FAFAF7] shadow-[3px_3px_0px_#171717]';
 
           if (isAnswerSubmitted) {
             if (idx === currentQ.correctIndex) {
-              buttonStyle = 'bg-emerald-950/40 border-emerald-500/80 text-emerald-200';
+              buttonClass = 'bg-[#70E000] shadow-[2px_2px_0px_#171717] translate-x-0.5 translate-y-0.5 font-bold';
             } else if (isSelected && !isCorrect) {
-              buttonStyle = 'bg-rose-950/40 border-rose-500/80 text-rose-200';
+              buttonClass = 'bg-[#FF6B6B] text-[#171717] shadow-[2px_2px_0px_#171717] translate-x-0.5 translate-y-0.5 font-bold';
             } else {
-              buttonStyle = 'bg-slate-950/40 border-slate-900 text-slate-500 opacity-60';
+              buttonClass = 'bg-[#F8F8F3] opacity-50 shadow-none';
             }
           } else if (isSelected) {
-            buttonStyle = 'bg-emerald-500/15 border-emerald-400 text-white shadow-sm';
+            buttonClass = 'bg-[#FFD84D] shadow-[2px_2px_0px_#171717] translate-x-0.5 translate-y-0.5 font-bold';
           }
 
           return (
@@ -101,55 +97,53 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
               key={idx}
               onClick={() => !isAnswerSubmitted && setSelectedOption(idx)}
               disabled={isAnswerSubmitted}
-              className={`w-full text-left p-4 rounded-2xl border transition-all text-xs sm:text-sm font-medium flex items-center justify-between gap-3 ${buttonStyle}`}
+              className={`w-full text-left p-4 rounded-lg border-2 border-[#171717] transition-all text-xs sm:text-sm flex items-center justify-between gap-3 cursor-pointer ${buttonClass}`}
             >
               <div className="flex items-center gap-3">
                 <span
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-mono font-bold shrink-0 ${
+                  className={`w-7 h-7 rounded border-2 border-[#171717] flex items-center justify-center font-display font-black text-xs shrink-0 ${
                     isSelected
-                      ? 'bg-emerald-400 text-slate-950'
-                      : 'bg-slate-800 text-slate-400'
+                      ? 'bg-[#171717] text-white'
+                      : 'bg-[#FFFFFF] text-[#171717]'
                   }`}
                 >
                   {String.fromCharCode(65 + idx)}
                 </span>
-                <span>{option}</span>
+                <span className="font-display font-bold text-[#171717]">{option}</span>
               </div>
 
               {isAnswerSubmitted && idx === currentQ.correctIndex && (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span className="font-mono text-xs font-black text-[#171717] bg-[#FFFFFF] px-2 py-0.5 rounded border border-[#171717]">
+                  ✓ CORRECT
+                </span>
               )}
               {isAnswerSubmitted && isSelected && !isCorrect && (
-                <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                <span className="font-mono text-xs font-black text-[#171717] bg-[#FFFFFF] px-2 py-0.5 rounded border border-[#171717]">
+                  ✕ INCORRECT
+                </span>
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Explanation banner upon submit */}
+      {/* Explanation Banner Upon Submit */}
       {isAnswerSubmitted && (
         <div
-          className={`p-4 rounded-2xl border mb-6 text-xs sm:text-sm leading-relaxed animate-in fade-in duration-200 ${
+          className={`p-4 rounded-lg border-2 border-[#171717] mb-6 text-xs sm:text-sm leading-relaxed shadow-[3px_3px_0px_#171717] animate-in fade-in duration-100 ${
             isCorrect
-              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+              ? 'bg-[#EBFBF4]'
+              : 'bg-[#FFEBEB]'
           }`}
         >
-          <div className="flex items-center gap-1.5 font-bold mb-1">
+          <div className="flex items-center gap-1.5 font-display font-black text-sm mb-1 text-[#171717]">
             {isCorrect ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Well done! That is correct.</span>
-              </>
+              <span>✓ Well done! That is correct.</span>
             ) : (
-              <>
-                <XCircle className="w-4 h-4 text-rose-400" />
-                <span>Not quite. Here is why:</span>
-              </>
+              <span>✕ Review the concept:</span>
             )}
           </div>
-          <p className="text-slate-300 mt-1">{currentQ.explanation}</p>
+          <p className="text-[#171717] font-medium mt-1">{currentQ.explanation}</p>
         </div>
       )}
 
@@ -159,10 +153,10 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
           <button
             onClick={handleSubmitAnswer}
             disabled={selectedOption === null}
-            className={`px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all ${
+            className={`nb-btn ${
               selectedOption !== null
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95'
-                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                ? 'nb-btn-primary'
+                : 'bg-[#E5E5DE] text-[#6B6B6B] border-2 border-[#171717] shadow-none cursor-not-allowed'
             }`}
           >
             Check Answer
@@ -170,10 +164,10 @@ export function QuizComponent({ questions, onComplete }: QuizComponentProps) {
         ) : (
           <button
             onClick={handleNext}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all"
+            className="nb-btn nb-btn-primary"
           >
             <span>{isLastQuestion ? 'Complete Lesson' : 'Next Question'}</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
           </button>
         )}
       </div>

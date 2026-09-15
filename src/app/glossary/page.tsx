@@ -1,162 +1,351 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AppShell } from '../../components/layout/AppShell';
-import { GLOSSARY_TERMS } from '../../data/glossaryData';
-import { Search, BookMarked, Sparkles, ArrowRight, Lightbulb, Calculator, BookOpen } from 'lucide-react';
+import { useUserState } from '../../context/UserStateContext';
+import {
+  PLAYABLE_CONCEPTS,
+  DAILY_CHALLENGES,
+} from '../../data/glossaryData';
+import { PlayableConcept, GlossaryCategory, ConceptMasteryStatus } from '../../types';
+import { DailyChallengeBanner } from '../../components/glossary/DailyChallengeBanner';
+import { LearningMap } from '../../components/glossary/LearningMap';
+import { ConceptCard } from '../../components/glossary/ConceptCard';
+import { ComparisonSection } from '../../components/glossary/ComparisonSection';
+import { ConceptViewerModal } from '../../components/glossary/ConceptViewerModal';
+import {
+  Search,
+  BookMarked,
+  Map,
+  Grid,
+  Scale,
+  Star,
+  Zap,
+  Sparkles,
+} from 'lucide-react';
 
-const CATEGORIES = ['All', 'Investing', 'Banking', 'Credit', 'Tax', 'General'] as const;
+const CATEGORIES: { label: string; cat: 'All' | GlossaryCategory; emoji: string }[] = [
+  { label: 'All', cat: 'All', emoji: '🌟' },
+  { label: 'Money Basics', cat: 'Money Basics', emoji: '💰' },
+  { label: 'Banking', cat: 'Banking', emoji: '🏦' },
+  { label: 'Credit', cat: 'Credit', emoji: '💳' },
+  { label: 'Investing', cat: 'Investing', emoji: '📈' },
+  { label: 'Markets', cat: 'Markets', emoji: '📊' },
+  { label: 'Risk', cat: 'Risk', emoji: '⚖️' },
+  { label: 'Taxes', cat: 'Taxes', emoji: '🧾' },
+  { label: 'Wealth', cat: 'Wealth', emoji: '💎' },
+];
 
-function GlossaryContent() {
+const SEARCH_SUGGESTIONS = [
+  { label: 'money growing', query: 'money growing' },
+  { label: 'putting money every month', query: 'putting money every month' },
+  { label: 'own part of company', query: 'own part of company' },
+  { label: 'central bank rate', query: 'central bank' },
+];
+
+function PlayableGlossaryContent() {
   const searchParams = useSearchParams();
-  const initialTerm = searchParams.get('term') || '';
+  const initialTermParam = searchParams.get('term') || '';
 
+  const { progress } = useUserState();
+
+  // Active View Mode: 'map' | 'cards' | 'compare'
+  const [viewMode, setViewMode] = useState<'map' | 'cards' | 'compare'>('map');
+
+  // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<'All' | GlossaryCategory>('All');
 
+  // Selected Concept for Modal
+  const [selectedConcept, setSelectedConcept] = useState<PlayableConcept | null>(null);
+
+  // Concept Mastery Map: { [conceptId]: 'learning' | 'practicing' | 'tested' | 'mastered' }
+  const [masteryMap, setMasteryMap] = useState<Record<string, ConceptMasteryStatus>>({});
+
+  // Load mastery from localStorage
   useEffect(() => {
-    if (initialTerm) {
-      const termObj = GLOSSARY_TERMS.find((t) => t.id === initialTerm);
-      if (termObj) {
-        setSearchQuery(termObj.term.split(' ')[0]);
+    try {
+      const saved = localStorage.getItem('finvera_glossary_mastery');
+      if (saved) {
+        setMasteryMap(JSON.parse(saved));
+      } else {
+        const initial: Record<string, ConceptMasteryStatus> = {};
+        PLAYABLE_CONCEPTS.forEach((c) => {
+          initial[c.id] = 'learning';
+        });
+        setMasteryMap(initial);
+      }
+    } catch {
+      // fallback
+    }
+  }, []);
+
+  // Check URL term param
+  useEffect(() => {
+    if (initialTermParam) {
+      const found = PLAYABLE_CONCEPTS.find(
+        (c) => c.id === initialTermParam || c.term.toLowerCase().includes(initialTermParam.toLowerCase())
+      );
+      if (found) {
+        setSelectedConcept(found);
       }
     }
-  }, [initialTerm]);
+  }, [initialTermParam]);
 
+  const handleConceptMastered = (conceptId: string) => {
+    setMasteryMap((prev) => {
+      const next = { ...prev, [conceptId]: 'mastered' as ConceptMasteryStatus };
+      try {
+        localStorage.setItem('finvera_glossary_mastery', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const handleNextConcept = () => {
+    if (!selectedConcept) return;
+    const currentIndex = PLAYABLE_CONCEPTS.findIndex((c) => c.id === selectedConcept.id);
+    const nextConcept = PLAYABLE_CONCEPTS[(currentIndex + 1) % PLAYABLE_CONCEPTS.length];
+    setSelectedConcept(nextConcept);
+  };
+
+  // Smart Search matching
   const q = searchQuery.toLowerCase().trim();
 
-  const filteredTerms = GLOSSARY_TERMS.filter((term) => {
-    const matchesCat = selectedCategory === 'All' || term.category === selectedCategory;
-    const matchesQuery =
-      !q ||
-      term.term.toLowerCase().includes(q) ||
-      term.definition.toLowerCase().includes(q) ||
-      term.simpleExplanation.toLowerCase().includes(q);
-    return matchesCat && matchesQuery;
-  });
+  const filteredConcepts = useMemo(() => {
+    return PLAYABLE_CONCEPTS.filter((concept) => {
+      const matchesCategory = selectedCategory === 'All' || concept.category === selectedCategory;
+
+      if (!q) return matchesCategory;
+
+      const inTerm = concept.term.toLowerCase().includes(q);
+      const inOneLiner = concept.simpleOneLiner.toLowerCase().includes(q);
+      const inDefinition = concept.definition.toLowerCase().includes(q);
+      const inKeywords = concept.searchKeywords?.some((k) => k.toLowerCase().includes(q));
+
+      return matchesCategory && (inTerm || inOneLiner || inDefinition || inKeywords);
+    });
+  }, [selectedCategory, q]);
+
+  // Total Mastery Calculation
+  const totalConceptsCount = PLAYABLE_CONCEPTS.length;
+  const masteredCount = Object.values(masteryMap).filter((s) => s === 'mastered').length;
+  const masteryPercentage = Math.round((masteredCount / totalConceptsCount) * 100);
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
-            Plain-English Reference
-          </span>
+    <div className="space-y-8 max-w-6xl mx-auto pb-12">
+      {/* 1. Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b-3 border-[#171717]">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="nb-sticker bg-[#70E000] text-[#171717]">
+              <Sparkles className="w-3.5 h-3.5" />
+              MONEY WORDS, MADE SIMPLE
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black font-space-grotesk text-[#171717] tracking-tight">
+            Make sense of money terms
+          </h1>
+          <p className="text-xs sm:text-sm font-medium text-[#171717]/80 mt-1 max-w-2xl">
+            Find a term, see how it works, and try it yourself. Everyday examples make new concepts easier to remember.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white mt-1 tracking-tight">
-          Financial Glossary
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Demystify Wall Street and Dalal Street jargon with simple definitions and real-world analogies.
-        </p>
+
+        {/* Global Progress Metrics Card */}
+        <div className="p-4 rounded-xl bg-[#FFFFFF] border-3 border-[#171717] shadow-[4px_4px_0px_#171717] flex items-center gap-5 shrink-0">
+          <div>
+            <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#171717] mb-1">
+              <Star className="w-4 h-4 fill-[#FFD84D] text-[#171717]" />
+              <span>MASTERY: {masteredCount} / {totalConceptsCount}</span>
+            </div>
+            <div className="w-36 bg-[#E5E5DE] border-2 border-[#171717] rounded-full h-3 overflow-hidden">
+              <div
+                style={{ width: `${masteryPercentage}%` }}
+                className="bg-[#70E000] h-full transition-all duration-300 border-r border-[#171717]"
+              />
+            </div>
+          </div>
+
+          <div className="border-l-2 border-[#171717] pl-4 space-y-0.5 text-right">
+            <span className="text-[10px] text-[#6B6B6B] font-mono font-bold uppercase block">Total XP</span>
+            <span className="text-sm font-black font-space-grotesk text-[#171717] bg-[#FFD84D] px-2 py-0.5 rounded border border-[#171717] flex items-center justify-end gap-1">
+              <Zap className="w-3.5 h-3.5 fill-[#171717]" />
+              {progress.xp} XP
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Search & Category Filter Bar */}
-      <div className="space-y-4">
-        <div className="relative">
-          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search any financial term (e.g. SIP, ETF, EMI, NAV, Demat)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 pl-12 pr-4 py-3.5 rounded-2xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 shadow-md"
-          />
-        </div>
+      {/* 2. Daily Finance Challenge */}
+      <DailyChallengeBanner challenge={DAILY_CHALLENGES[0]} />
 
-        {/* Category Filter Pills */}
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
+      {/* 3. Controls & View Switcher Bar */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Smart Search Bar */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-[#171717] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search concepts or try 'money growing', 'putting money every month'..."
+              className="w-full bg-[#FFFFFF] border-3 border-[#171717] pl-11 pr-14 py-3 rounded-xl text-xs sm:text-sm font-medium text-[#171717] placeholder-[#6B6B6B] shadow-[3px_3px_0px_#171717] focus:outline-none focus:bg-[#FFF9E6] transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold bg-[#E5E5DE] px-2 py-0.5 rounded border border-[#171717] text-[#171717] hover:bg-[#FF8FAB] cursor-pointer"
+              >
+                CLEAR
+              </button>
+            )}
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex p-1 rounded-xl bg-[#F8F8F3] border-3 border-[#171717] shadow-[3px_3px_0px_#171717] self-start sm:self-auto shrink-0 gap-1">
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                selectedCategory === cat
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+              onClick={() => setViewMode('map')}
+              className={`px-3.5 py-2 rounded-lg text-xs font-space-grotesk font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'map'
+                  ? 'bg-[#70E000] text-[#171717] border-2 border-[#171717] shadow-[2px_2px_0px_#171717]'
+                  : 'text-[#171717] hover:bg-[#FFFFFF] border-2 border-transparent'
               }`}
             >
-              {cat}
+              <Map className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>LEARNING MAP</span>
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Glossary Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredTerms.length === 0 ? (
-          <div className="col-span-2 text-center py-12 text-slate-400">
-            <BookMarked className="w-10 h-10 mx-auto text-slate-600 mb-3" />
-            <p className="text-sm font-semibold text-slate-300">No glossary terms match your search</p>
-            <p className="text-xs text-slate-500 mt-1">Try searching for SIP, ETF, or Inflation.</p>
-          </div>
-        ) : (
-          filteredTerms.map((term) => (
-            <div
-              key={term.id}
-              className="p-5 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-3"
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`px-3.5 py-2 rounded-lg text-xs font-space-grotesk font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'cards'
+                  ? 'bg-[#70E000] text-[#171717] border-2 border-[#171717] shadow-[2px_2px_0px_#171717]'
+                  : 'text-[#171717] hover:bg-[#FFFFFF] border-2 border-transparent'
+              }`}
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-base font-extrabold text-white tracking-tight">{term.term}</h3>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-slate-700 shrink-0">
-                    {term.category}
+              <Grid className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>PLAYABLE CARDS</span>
+            </button>
+            <button
+              onClick={() => setViewMode('compare')}
+              className={`px-3.5 py-2 rounded-lg text-xs font-space-grotesk font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'compare'
+                  ? 'bg-[#70E000] text-[#171717] border-2 border-[#171717] shadow-[2px_2px_0px_#171717]'
+                  : 'text-[#171717] hover:bg-[#FFFFFF] border-2 border-transparent'
+              }`}
+            >
+              <Scale className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>COMPARE</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Smart Search Suggestion Chips */}
+        {!searchQuery && (
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-[#171717] pt-0.5">
+            <span className="text-[11px] font-mono font-bold text-[#6B6B6B]">Try searching:</span>
+            {SEARCH_SUGGESTIONS.map((s) => (
+              <button
+                key={s.label}
+                onClick={() => setSearchQuery(s.query)}
+                className="px-2.5 py-1 rounded-lg bg-[#FFFFFF] border-2 border-[#171717] shadow-[1px_1px_0px_#171717] text-[#171717] hover:bg-[#FFD84D] text-[11px] font-bold transition-all cursor-pointer"
+              >
+                &ldquo;{s.label}&rdquo;
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Category Filters (Visible for Map and Cards) */}
+        {viewMode !== 'compare' && (
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none pt-1">
+            {CATEGORIES.map((c) => {
+              const isSelected = selectedCategory === c.cat;
+              const count =
+                c.cat === 'All'
+                  ? PLAYABLE_CONCEPTS.length
+                  : PLAYABLE_CONCEPTS.filter((p) => p.category === c.cat).length;
+
+              return (
+                <button
+                  key={c.label}
+                  onClick={() => setSelectedCategory(c.cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-space-grotesk font-black whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 border-2 border-[#171717] cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#FFD84D] text-[#171717] shadow-[2px_2px_0px_#171717] -translate-y-0.5'
+                      : 'bg-[#FFFFFF] text-[#171717] shadow-[1px_1px_0px_#171717] hover:bg-[#F8F8F3]'
+                  }`}
+                >
+                  <span>{c.emoji}</span>
+                  <span>{c.label}</span>
+                  <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-[#F8F8F3] border border-[#171717]">
+                    {count}
                   </span>
-                </div>
-
-                {/* Plain English explanation */}
-                <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 mb-3">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 mb-1">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>In Simple Terms:</span>
-                  </div>
-                  <p className="text-xs text-slate-200 leading-relaxed">{term.simpleExplanation}</p>
-                </div>
-
-                {/* Formal definition */}
-                <p className="text-xs text-slate-400 leading-relaxed mb-2">
-                  <span className="font-semibold text-slate-300">Technical: </span>
-                  {term.definition}
-                </p>
-
-                {/* Real life example */}
-                <div className="text-[11px] text-slate-400 italic">
-                  <span className="font-semibold not-italic text-teal-400">Example: </span>
-                  {term.example}
-                </div>
-              </div>
-
-              {/* Related lesson or calculator link */}
-              {(term.relatedLessonId || term.relatedCalculator) && (
-                <div className="pt-2 border-t border-slate-800/80 flex items-center gap-2">
-                  {term.relatedLessonId && (
-                    <Link
-                      href={`/learn/${term.relatedLessonId}`}
-                      className="text-[11px] font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1"
-                    >
-                      <BookOpen className="w-3 h-3" />
-                      <span>Take Lesson</span>
-                    </Link>
-                  )}
-                  {term.relatedCalculator && (
-                    <Link
-                      href={`/calculators?type=${term.relatedCalculator}`}
-                      className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
-                    >
-                      <Calculator className="w-3 h-3" />
-                      <span>Open Calculator</span>
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
-          ))
+                </button>
+              );
+            })}
+          </div>
         )}
       </div>
+
+      {/* 4. Main View Renders */}
+      {viewMode === 'map' && (
+        <LearningMap
+          concepts={filteredConcepts}
+          masteryMap={masteryMap}
+          onSelectConcept={(c) => setSelectedConcept(c)}
+        />
+      )}
+
+      {viewMode === 'cards' && (
+        <div>
+          {filteredConcepts.length === 0 ? (
+            <div className="p-12 rounded-xl bg-[#FFFFFF] border-3 border-[#171717] shadow-[4px_4px_0px_#171717] text-center space-y-3">
+              <BookMarked className="w-10 h-10 text-[#171717] mx-auto stroke-[2]" />
+              <p className="text-base font-black font-space-grotesk text-[#171717]">No financial concepts match your search</p>
+              <p className="text-xs text-[#6B6B6B] font-medium">
+                Try searching for &apos;SIP&apos;, &apos;Inflation&apos;, &apos;Compounding&apos;, or &apos;Diversification&apos;.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                }}
+                className="mt-2 px-4 py-2 rounded-lg bg-[#FFD84D] border-2 border-[#171717] shadow-[2px_2px_0px_#171717] text-xs font-black font-space-grotesk text-[#171717] hover:bg-[#70E000] transition-colors cursor-pointer"
+              >
+                RESET FILTERS
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredConcepts.map((concept) => (
+                <ConceptCard
+                  key={concept.id}
+                  concept={concept}
+                  status={masteryMap[concept.id] || 'learning'}
+                  onSelect={(c) => setSelectedConcept(c)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {viewMode === 'compare' && <ComparisonSection />}
+
+      {/* 5. Playable Concept Modal Player */}
+      {selectedConcept && (
+        <ConceptViewerModal
+          concept={selectedConcept}
+          isOpen={Boolean(selectedConcept)}
+          onClose={() => setSelectedConcept(null)}
+          onNextConcept={handleNextConcept}
+          onConceptMastered={handleConceptMastered}
+        />
+      )}
     </div>
   );
 }
@@ -164,14 +353,8 @@ function GlossaryContent() {
 export default function GlossaryPage() {
   return (
     <AppShell>
-      <Suspense
-        fallback={
-          <div className="p-8 text-center text-slate-400 text-sm">
-            Loading Glossary...
-          </div>
-        }
-      >
-        <GlossaryContent />
+      <Suspense fallback={<div className="text-[#171717] font-mono text-sm">Loading Playable Glossary...</div>}>
+        <PlayableGlossaryContent />
       </Suspense>
     </AppShell>
   );

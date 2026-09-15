@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, BookOpen, Calculator, BookMarked, Target, ArrowRight } from 'lucide-react';
+import { Search, X, Calculator, BookMarked, Target, ArrowRight, Compass } from 'lucide-react';
 import { ALL_LESSONS } from '../../data/lessonsData';
 import { GLOSSARY_TERMS } from '../../data/glossaryData';
 import { MONEY_MISSIONS } from '../../data/missionsData';
@@ -15,12 +15,37 @@ interface GlobalSearchModalProps {
 export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   const [query, setQuery] = useState('');
   const router = useRouter();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    dialog?.querySelector('input')?.focus();
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !dialog) return;
+      const controls = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), input, a[href], [tabindex="0"]'));
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    dialog?.addEventListener('keydown', trapFocus);
+    return () => {
+      dialog?.removeEventListener('keydown', trapFocus);
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        // Toggle handled outside
       }
       if (e.key === 'Escape') {
         onClose();
@@ -79,44 +104,46 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+    <div onClick={(event) => { if (event.target === event.currentTarget) onClose(); }} className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-[#171717]/40 backdrop-blur-xs animate-in fade-in duration-100">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Search FinVera" className="w-full max-w-2xl bg-[#FFFFFF] border-2 border-[#171717] rounded-xl shadow-[4px_4px_0px_#171717] overflow-hidden flex flex-col max-h-[75dvh]">
         {/* Search Input Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-slate-800 gap-3">
-          <Search className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className="flex items-center px-4 py-3.5 border-b-2 border-[#171717] gap-3 bg-[#FAFAF7]">
+          <Search className="w-5 h-5 text-[#171717] stroke-[2.5] shrink-0" />
           <input
             type="text"
-            placeholder="Search lessons, calculators, glossary terms, or missions..."
-            className="w-full bg-transparent text-slate-100 placeholder-slate-400 text-sm focus:outline-none"
+            aria-label="Search lessons, calculators, glossary, or missions"
+            placeholder="Search lessons, calculators, glossary, or missions..."
+            className="w-full bg-transparent text-[#171717] placeholder-[#6B6B6B] text-sm font-display font-bold focus:outline-none"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            autoFocus
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="text-slate-400 hover:text-slate-200 p-1 rounded-md"
+              aria-label="Clear search"
+              className="text-[#171717] hover:bg-[#E5E5DE] p-1 rounded border border-[#171717]"
             >
               <X className="w-4 h-4" />
             </button>
           )}
-          <kbd className="hidden sm:inline-block px-2 py-0.5 text-[11px] font-mono font-medium text-slate-400 bg-slate-800 border border-slate-700 rounded">
+          <kbd className="hidden sm:inline-block px-2 py-0.5 text-[11px] font-mono font-bold text-[#171717] bg-[#FFD84D] border border-[#171717] rounded">
             ESC
           </kbd>
+          <button onClick={onClose} aria-label="Close search" className="w-11 h-11 shrink-0 flex items-center justify-center rounded-lg hover:bg-[#E5E5DE] cursor-pointer"><X size={20} /></button>
         </div>
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {!q ? (
-            <div className="text-center py-10 text-slate-400 text-sm">
-              <p className="font-medium text-slate-300 mb-1">Quick Search</p>
-              <p className="text-xs">Type a keyword like &quot;SIP&quot;, &quot;EMI&quot;, &quot;Compound Interest&quot;, or &quot;Budgeting&quot;</p>
+            <div className="text-center py-8 text-[#6B6B6B] text-sm">
+              <p className="font-display font-extrabold text-base text-[#171717] mb-1">Quick Search</p>
+              <p className="text-xs text-[#6B6B6B]">Select a financial concept to jump directly:</p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {['SIP', 'Inflation', 'Needs vs Wants', 'Credit Score', 'Emergency Fund'].map((tag) => (
+                {['SIP', 'Inflation', 'Needs vs Wants', 'Credit Score', 'Emergency Fund', 'EMI'].map((tag) => (
                   <button
                     key={tag}
                     onClick={() => setQuery(tag)}
-                    className="text-xs px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                    className="nb-tag bg-[#FFFFFF] hover:bg-[#70E000] text-[#171717] transition-all cursor-pointer"
                   >
                     {tag}
                   </button>
@@ -124,17 +151,17 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               </div>
             </div>
           ) : totalResults === 0 ? (
-            <div className="text-center py-10 text-slate-400 text-sm">
-              <p>No results found for &quot;{query}&quot;</p>
-              <p className="text-xs text-slate-500 mt-1">Try a different financial concept or term.</p>
+            <div className="text-center py-10 text-[#6B6B6B] text-sm">
+              <p className="font-display font-extrabold text-[#171717]">No results found for &quot;{query}&quot;</p>
+              <p className="text-xs text-[#6B6B6B] mt-1">Try another financial topic or calculator name.</p>
             </div>
           ) : (
             <>
               {/* Calculators */}
               {matchingCalcs.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
-                    <Calculator className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1.5 text-xs font-display font-extrabold text-[#171717] uppercase tracking-wider mb-2">
+                    <Calculator className="w-3.5 h-3.5 stroke-[2.5]" />
                     <span>Calculators</span>
                   </div>
                   <div className="space-y-1.5">
@@ -142,15 +169,15 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                       <button
                         key={calc.id}
                         onClick={() => navigateTo(`/calculators?type=${calc.id}`)}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors flex items-center justify-between group border border-transparent hover:border-slate-700"
+                        className="w-full text-left p-3 rounded-lg border-2 border-[#171717] bg-[#FFFFFF] hover:bg-[#70E000] hover:shadow-[3px_3px_0px_#171717] transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div>
-                          <p className="text-sm font-semibold text-slate-100 group-hover:text-emerald-300">
+                          <p className="text-sm font-display font-extrabold text-[#171717]">
                             {calc.title}
                           </p>
-                          <p className="text-xs text-slate-400">{calc.desc}</p>
+                          <p className="text-xs text-[#6B6B6B] group-hover:text-[#171717]">{calc.desc}</p>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-[#171717] shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -160,56 +187,65 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* Lessons */}
               {matchingLessons.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-400 uppercase tracking-wider mb-2">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>Lessons</span>
+                  <div className="flex items-center gap-1.5 text-xs font-display font-extrabold text-[#171717] uppercase tracking-wider mb-2">
+                    <Compass className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Interactive Lessons</span>
                   </div>
                   <div className="space-y-1.5">
                     {matchingLessons.map((lesson) => (
                       <button
                         key={lesson.id}
                         onClick={() => navigateTo(`/learn/${lesson.id}`)}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors flex items-center justify-between group border border-transparent hover:border-slate-700"
+                        className="w-full text-left p-3 rounded-lg border-2 border-[#171717] bg-[#FFFFFF] hover:bg-[#6C8CFF] hover:shadow-[3px_3px_0px_#171717] transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300">
-                              {lesson.levelName}
+                            <span className="text-[10px] font-mono font-black text-[#171717] bg-[#FFD84D] px-1.5 py-0.2 rounded border border-[#171717]">
+                              L{lesson.level}
                             </span>
-                            <p className="text-sm font-semibold text-slate-100 group-hover:text-teal-300">
+                            <p className="text-sm font-display font-extrabold text-[#171717]">
                               {lesson.title}
                             </p>
                           </div>
-                          <p className="text-xs text-slate-400 mt-0.5">{lesson.shortDescription}</p>
+                          <p className="text-xs text-[#6B6B6B] group-hover:text-[#171717] mt-0.5 line-clamp-1">
+                            {lesson.shortDescription}
+                          </p>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-teal-400 group-hover:translate-x-0.5 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-[#171717] shrink-0" />
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Glossary Terms */}
+              {/* Glossary */}
               {matchingGlossary.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2">
-                    <BookMarked className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1.5 text-xs font-display font-extrabold text-[#171717] uppercase tracking-wider mb-2">
+                    <BookMarked className="w-3.5 h-3.5 stroke-[2.5]" />
                     <span>Glossary Terms</span>
                   </div>
                   <div className="space-y-1.5">
-                    {matchingGlossary.map((term) => (
+                    {matchingGlossary.map((g) => (
                       <button
-                        key={term.id}
-                        onClick={() => navigateTo(`/glossary?term=${term.id}`)}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors flex items-center justify-between group border border-transparent hover:border-slate-700"
+                        key={g.id}
+                        onClick={() => navigateTo(`/glossary?term=${g.id}`)}
+                        className="w-full text-left p-3 rounded-lg border-2 border-[#171717] bg-[#FFFFFF] hover:bg-[#FFD84D] hover:shadow-[3px_3px_0px_#171717] transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div>
-                          <p className="text-sm font-semibold text-slate-100 group-hover:text-amber-300">
-                            {term.term}
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-display font-extrabold text-[#171717]">
+                              {g.term}
+                            </p>
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#E5E5DE] border border-[#171717] text-[#171717]">
+                              {g.category}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#6B6B6B] group-hover:text-[#171717] line-clamp-1 mt-0.5">
+                            {g.definition}
                           </p>
-                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{term.simpleExplanation}</p>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-[#171717] shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -219,24 +255,26 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* Missions */}
               {matchingMissions.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">
-                    <Target className="w-3.5 h-3.5" />
-                    <span>Missions</span>
+                  <div className="flex items-center gap-1.5 text-xs font-display font-extrabold text-[#171717] uppercase tracking-wider mb-2">
+                    <Target className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Money Missions</span>
                   </div>
                   <div className="space-y-1.5">
-                    {matchingMissions.map((mission) => (
+                    {matchingMissions.map((m) => (
                       <button
-                        key={mission.id}
-                        onClick={() => navigateTo(`/practice/missions`)}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors flex items-center justify-between group border border-transparent hover:border-slate-700"
+                        key={m.id}
+                        onClick={() => navigateTo('/practice/missions')}
+                        className="w-full text-left p-3 rounded-lg border-2 border-[#171717] bg-[#FFFFFF] hover:bg-[#B99CFF] hover:shadow-[3px_3px_0px_#171717] transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div>
-                          <p className="text-sm font-semibold text-slate-100 group-hover:text-purple-300">
-                            {mission.title}
+                          <p className="text-sm font-display font-extrabold text-[#171717]">
+                            {m.title}
                           </p>
-                          <p className="text-xs text-slate-400 line-clamp-1">{mission.prompt}</p>
+                          <p className="text-xs text-[#6B6B6B] group-hover:text-[#171717] line-clamp-1">
+                            {m.prompt}
+                          </p>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-[#171717] shrink-0" />
                       </button>
                     ))}
                   </div>

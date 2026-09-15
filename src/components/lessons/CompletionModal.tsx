@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { Sparkles, Zap, Flame, ArrowRight, CheckCircle2, Trophy, RotateCcw } from 'lucide-react';
+import { Zap, Flame, ArrowRight, Trophy, Award } from 'lucide-react';
 
 interface CompletionModalProps {
   isOpen: boolean;
@@ -22,19 +22,18 @@ export function CompletionModal({
   streakDays,
   nextLessonId,
   newAchievements = [],
-  onClose,
 }: CompletionModalProps) {
   useEffect(() => {
     if (isOpen) {
       try {
         confetti({
-          particleCount: 80,
-          spread: 70,
+          particleCount: 70,
+          spread: 60,
           origin: { y: 0.6 },
-          colors: ['#10b981', '#14b8a6', '#f59e0b', '#3b82f6'],
+          colors: ['#70E000', '#6C8CFF', '#FFD84D', '#171717'],
         });
       } catch {
-        // Fallback gracefully if canvas-confetti is not loaded
+        // Fallback
       }
     }
   }, [isOpen]);
@@ -42,50 +41,47 @@ export function CompletionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl text-center relative overflow-hidden animate-in zoom-in-95 duration-200">
-        {/* Background ambient glow */}
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Big Trophy Icon */}
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 shadow-xl shadow-emerald-500/30 mb-5 animate-bounce">
-          <Trophy className="w-8 h-8" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#171717]/60 backdrop-blur-xs animate-in fade-in duration-100">
+      <div className="w-full max-w-md bg-[#FFFFFF] border-3 border-[#171717] rounded-xl p-6 sm:p-8 shadow-[8px_8px_0px_#171717] text-center relative overflow-hidden">
+        {/* Trophy Stamp Icon */}
+        <div className="w-16 h-16 mx-auto rounded-xl bg-[#70E000] border-3 border-[#171717] shadow-[4px_4px_0px_#171717] flex items-center justify-center text-[#171717] mb-4 rotate-[-2deg]">
+          <Trophy className="w-8 h-8 stroke-[2.5]" />
         </div>
 
-        <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-          Lesson Completed!
+        <span className="nb-sticker bg-[#FFD84D] text-[#171717] mb-2">
+          LESSON COMPLETED!
         </span>
-        <h2 className="text-xl sm:text-2xl font-extrabold text-white mt-1 mb-2 tracking-tight">
-          {lessonTitle}
+        <h2 className="font-display font-black text-2xl text-[#171717] mt-2 mb-1 tracking-tight">
+          {lessonTitle.toUpperCase()}
         </h2>
-        <p className="text-xs text-slate-400 max-w-xs mx-auto mb-6">
-          Great job! You took another structured step forward on your path to financial freedom.
+        <p className="text-xs text-[#6B6B6B] font-medium max-w-xs mx-auto mb-5">
+          Great discipline. Another verified milestone checked off your wealth journey.
         </p>
 
         {/* Stats Badges */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-            <div className="flex items-center justify-center gap-1.5 text-emerald-400 font-extrabold text-lg font-mono">
-              <Zap className="w-5 h-5 fill-emerald-400" />
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="p-3 bg-[#EBFBF4] border-2 border-[#171717] rounded-lg shadow-[2px_2px_0px_#171717]">
+            <div className="flex items-center justify-center gap-1 text-[#171717] font-display font-black text-lg">
+              <Zap className="w-4 h-4 fill-[#171717]" />
               <span>+{xpEarned} XP</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Knowledge XP Earned</p>
+            <p className="font-mono text-[10px] text-[#6B6B6B] font-bold uppercase mt-0.5">Knowledge XP</p>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-            <div className="flex items-center justify-center gap-1.5 text-amber-400 font-extrabold text-lg font-mono">
-              <Flame className="w-5 h-5 fill-amber-400" />
+          <div className="p-3 bg-[#FFF9E0] border-2 border-[#171717] rounded-lg shadow-[2px_2px_0px_#171717]">
+            <div className="flex items-center justify-center gap-1 text-[#171717] font-display font-black text-lg">
+              <Flame className="w-4 h-4 fill-[#171717]" />
               <span>{streakDays} Days</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Streak Maintained</p>
+            <p className="font-mono text-[10px] text-[#6B6B6B] font-bold uppercase mt-0.5">Active Streak</p>
           </div>
         </div>
 
-        {/* New Badge Unlocked Notice if any */}
+        {/* New Badge Notice if any */}
         {newAchievements.length > 0 && (
-          <div className="mb-6 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span className="font-semibold">New Badge Unlocked in Achievements!</span>
+          <div className="mb-5 p-2.5 rounded-lg bg-[#FFD84D] border-2 border-[#171717] text-[#171717] text-xs font-display font-black flex items-center justify-center gap-2">
+            <Award className="w-4 h-4" />
+            <span>NEW MILESTONE BADGE UNLOCKED!</span>
           </div>
         )}
 
@@ -94,24 +90,24 @@ export function CompletionModal({
           {nextLessonId ? (
             <Link
               href={`/learn/${nextLessonId}`}
-              className="w-full py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="nb-btn nb-btn-primary w-full py-3.5 text-sm"
             >
-              <span>Continue to Next Lesson</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>CONTINUE TO NEXT LESSON</span>
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
             </Link>
           ) : (
             <Link
               href="/learn"
-              className="w-full py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="nb-btn nb-btn-primary w-full py-3.5 text-sm"
             >
-              <span>Explore Roadmap</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>EXPLORE ROADMAP</span>
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
             </Link>
           )}
 
           <Link
             href="/learn"
-            className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors block"
+            className="text-xs font-display font-bold text-[#6B6B6B] hover:text-[#171717] block py-1.5"
           >
             Back to Learning Roadmap
           </Link>

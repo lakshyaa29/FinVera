@@ -14,7 +14,7 @@ import { evaluateLevelUnlock } from '../data/unlockRequirements';
 
 export function getLevelTitleForXP(xp: number): string {
   if (xp >= 4500) return 'Wealth Builder';
-  if (xp >= 2800) return 'FinVera';
+  if (xp >= 2800) return 'FinVera Pro';
   if (xp >= 1500) return 'Investing Explorer';
   if (xp >= 700) return 'Finance Learner';
   if (xp >= 250) return 'Money Explorer';
@@ -74,7 +74,9 @@ interface UserStateContextType {
   buyAsset: (assetId: string, symbol: string, name: string, units: number, price: number) => { success: boolean; message: string };
   sellAsset: (assetId: string, units: number, price: number) => { success: boolean; message: string };
   setHealthScore: (questionId: string, points: number) => void;
+  awardGlossaryXp: (conceptId: string, stage: string, xpAmount: number) => void;
   resetAllData: () => void;
+  logout: () => Promise<void>;
 }
 
 const UserStateContext = createContext<UserStateContextType | undefined>(undefined);
@@ -86,57 +88,129 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
   const [healthScores, setHealthScoresState] = useState<Record<string, number>>(DEFAULT_HEALTH_SCORES);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load state from localStorage on initial mount
+  // Load state from server session on initial mount, falling back to local storage
   useEffect(() => {
-    const savedProfile = loadFromStorage<UserProfile>(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
-    const savedProgress = loadFromStorage<UserProgress>(STORAGE_KEYS.PROGRESS, DEFAULT_PROGRESS);
-    const savedPortfolio = loadFromStorage<SimulatedPortfolio>(STORAGE_KEYS.PORTFOLIO, DEFAULT_PORTFOLIO);
-    const savedHealth = loadFromStorage<Record<string, number>>(STORAGE_KEYS.HEALTH, DEFAULT_HEALTH_SCORES);
+    async function initSession() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated) {
+            const today = new Date().toISOString().split('T')[0];
+            const lastDate = data.progress?.lastActiveDate;
+            let currentStreak = data.progress?.streakDays || 0;
 
-    // Update streak if needed
-    const today = new Date().toISOString().split('T')[0];
-    const lastDate = savedProgress.lastActiveDate;
-    let currentStreak = savedProgress.streakDays || 1;
+            if (lastDate) {
+              const last = new Date(lastDate);
+              const curr = new Date(today);
+              const diffTime = Math.abs(curr.getTime() - last.getTime());
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (lastDate) {
-      const last = new Date(lastDate);
-      const curr = new Date(today);
-      const diffTime = Math.abs(curr.getTime() - last.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              if (diffDays === 1) {
+                currentStreak += 1;
+              } else if (diffDays > 1) {
+                currentStreak = 1;
+              }
+            } else {
+              currentStreak = 1;
+            }
 
-      if (diffDays === 1) {
-        // Logged in next day, streak continues
-        currentStreak += 1;
-      } else if (diffDays > 1) {
-        // Missed a day
-        currentStreak = 1;
+            const unlocked: number[] = [1];
+            for (let lvl = 2; lvl <= 6; lvl++) {
+              const r = evaluateLevelUnlock(
+                lvl as LessonLevel,
+                data.progress?.completedLessonIds || [],
+                ALL_LESSONS
+              );
+              if (r.isUnlocked) unlocked.push(lvl);
+            }
+
+            const activeProgress: UserProgress = {
+              ...data.progress,
+              streakDays: currentStreak,
+              lastActiveDate: today,
+              unlockedLevels: unlocked,
+              levelTitle: getLevelTitleForXP(data.progress?.xp || 0),
+            };
+
+            setProfileState(data.profile);
+            setProgressState(activeProgress);
+            setPortfolioState(data.portfolio || DEFAULT_PORTFOLIO);
+            setHealthScoresState(data.healthScores || {});
+            setIsLoaded(true);
+
+            saveToStorage(STORAGE_KEYS.PROFILE, data.profile);
+            saveToStorage(STORAGE_KEYS.PROGRESS, activeProgress);
+            saveToStorage(STORAGE_KEYS.PORTFOLIO, data.portfolio || DEFAULT_PORTFOLIO);
+            saveToStorage(STORAGE_KEYS.HEALTH, data.healthScores || {});
+
+            fetch('/api/progress', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                streakDays: currentStreak,
+                lastActiveDate: today,
+                unlockedLevels: unlocked,
+              }),
+            }).catch(() => {});
+
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load session from server:', err);
       }
+
+      // Fallback for unauthenticated or offline preview
+      const savedProfile = loadFromStorage<UserProfile>(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
+      const savedProgress = loadFromStorage<UserProgress>(STORAGE_KEYS.PROGRESS, DEFAULT_PROGRESS);
+      const savedPortfolio = loadFromStorage<SimulatedPortfolio>(STORAGE_KEYS.PORTFOLIO, DEFAULT_PORTFOLIO);
+      const savedHealth = loadFromStorage<Record<string, number>>(STORAGE_KEYS.HEALTH, DEFAULT_HEALTH_SCORES);
+
+      // Refresh streak if needed
+      const today = new Date().toISOString().split('T')[0];
+      const lastDate = savedProgress.lastActiveDate;
+      let currentStreak = savedProgress.streakDays || 1;
+
+      if (lastDate) {
+        const last = new Date(lastDate);
+        const curr = new Date(today);
+        const diffTime = Math.abs(curr.getTime() - last.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          currentStreak += 1;
+        } else if (diffDays > 1) {
+          currentStreak = 1;
+        }
+      }
+
+      const unlocked: number[] = [1];
+      for (let lvl = 2; lvl <= 6; lvl++) {
+        const res = evaluateLevelUnlock(lvl as LessonLevel, savedProgress.completedLessonIds || [], ALL_LESSONS);
+        if (res.isUnlocked) {
+          unlocked.push(lvl);
+        }
+      }
+
+      const updatedProgress = {
+        ...savedProgress,
+        streakDays: currentStreak,
+        lastActiveDate: today,
+        unlockedLevels: unlocked,
+        levelTitle: getLevelTitleForXP(savedProgress.xp || 0),
+      };
+
+      setProfileState(savedProfile);
+      setProgressState(updatedProgress);
+      setPortfolioState(savedPortfolio);
+      setHealthScoresState(savedHealth);
+      setIsLoaded(true);
+
+      saveToStorage(STORAGE_KEYS.PROGRESS, updatedProgress);
     }
 
-    // Refresh unlocked levels
-    const unlocked: number[] = [1];
-    for (let lvl = 2; lvl <= 6; lvl++) {
-      const res = evaluateLevelUnlock(lvl as LessonLevel, savedProgress.completedLessonIds || [], ALL_LESSONS);
-      if (res.isUnlocked) {
-        unlocked.push(lvl);
-      }
-    }
-
-    const updatedProgress = {
-      ...savedProgress,
-      streakDays: currentStreak,
-      lastActiveDate: today,
-      unlockedLevels: unlocked,
-      levelTitle: getLevelTitleForXP(savedProgress.xp || 0),
-    };
-
-    setProfileState(savedProfile);
-    setProgressState(updatedProgress);
-    setPortfolioState(savedPortfolio);
-    setHealthScoresState(savedHealth);
-    setIsLoaded(true);
-
-    saveToStorage(STORAGE_KEYS.PROGRESS, updatedProgress);
+    initSession();
   }, []);
 
   const updateProfile = (updates: Partial<UserProfile>) => {
@@ -145,6 +219,12 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
       saveToStorage(STORAGE_KEYS.PROFILE, next);
       return next;
     });
+
+    fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    }).catch((e) => console.error('Error syncing profile:', e));
   };
 
   const setAgeGroup = (age: AgeGroup) => {
@@ -202,6 +282,13 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
       };
 
       saveToStorage(STORAGE_KEYS.PROGRESS, nextProgress);
+
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nextProgress),
+      }).catch((e) => console.error('Error syncing lesson progress:', e));
+
       return nextProgress;
     });
 
@@ -220,6 +307,13 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
         levelTitle: getLevelTitleForXP(nextXp),
       };
       saveToStorage(STORAGE_KEYS.PROGRESS, next);
+
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      }).catch((e) => console.error('Error syncing mission progress:', e));
+
       return next;
     });
   };
@@ -244,6 +338,13 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
         levelTitle: getLevelTitleForXP(prev.xp + bonusXp),
       };
       saveToStorage(STORAGE_KEYS.PROGRESS, next);
+
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      }).catch((e) => console.error('Error syncing calculator progress:', e));
+
       return next;
     });
   };
@@ -260,16 +361,30 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
         levelTitle: getLevelTitleForXP(nextXp),
       };
       saveToStorage(STORAGE_KEYS.PROGRESS, next);
+
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      }).catch((e) => console.error('Error syncing quiz pass:', e));
+
       return next;
     });
   };
 
-  const buyAsset = (assetId: string, symbol: string, name: string, units: number, price: number) => {
+  const buyAsset = (
+    assetId: string,
+    symbol: string,
+    name: string,
+    units: number,
+    price: number
+  ) => {
     const totalCost = units * price;
     if (portfolio.virtualCash < totalCost) {
       return { success: false, message: 'Insufficient virtual cash to complete order.' };
     }
 
+    // Client-side instant state update
     setPortfolioState((prev) => {
       const currentHolding = prev.holdings[assetId] || {
         assetId,
@@ -312,7 +427,21 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
       return nextPortfolio;
     });
 
-    // Check achievement for first trade
+    // Server-side asynchronous sync
+    fetch('/api/trade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assetId,
+        symbol,
+        name,
+        action: 'BUY',
+        units,
+        price,
+      }),
+    }).catch(() => {});
+
+    // Achievement check
     setProgressState((prev) => {
       if (prev.achievements.includes('first-simulation')) return prev;
       const nextAchievements = [...prev.achievements, 'first-simulation'];
@@ -324,6 +453,11 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
         levelTitle: getLevelTitleForXP(nextXp),
       };
       saveToStorage(STORAGE_KEYS.PROGRESS, next);
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      }).catch(() => {});
       return next;
     });
 
@@ -378,13 +512,61 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
       return nextPortfolio;
     });
 
-    return { success: true, message: `Successfully sold ${units} units for ${totalReturn.toLocaleString('en-IN')}.` };
+    // Server-side asynchronous sync
+    fetch('/api/trade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assetId,
+        symbol: assetId,
+        name: assetId,
+        action: 'SELL',
+        units,
+        price,
+      }),
+    }).catch(() => {});
+
+    return { success: true, message: `Successfully sold ${units} units for ₹${totalReturn.toLocaleString('en-IN')}.` };
   };
 
   const setHealthScore = (questionId: string, points: number) => {
     setHealthScoresState((prev) => {
       const next = { ...prev, [questionId]: points };
       saveToStorage(STORAGE_KEYS.HEALTH, next);
+
+      const total = Object.values(next).reduce((sum, v) => sum + v, 0);
+      fetch('/api/health', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scores: next, overallScore: total }),
+      }).catch(() => {});
+
+      return next;
+    });
+  };
+
+  const awardGlossaryXp = (conceptId: string, stage: string, xpAmount: number) => {
+    setProgressState((prev) => {
+      const nextXp = prev.xp + xpAmount;
+      const nextAchievements = [...prev.achievements];
+      if (!nextAchievements.includes('first-concept')) {
+        nextAchievements.push('first-concept');
+      }
+
+      const next: UserProgress = {
+        ...prev,
+        xp: nextXp,
+        levelTitle: getLevelTitleForXP(nextXp),
+        achievements: nextAchievements,
+      };
+      saveToStorage(STORAGE_KEYS.PROGRESS, next);
+
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      }).catch(() => {});
+
       return next;
     });
   };
@@ -398,6 +580,16 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
     saveToStorage(STORAGE_KEYS.PROGRESS, DEFAULT_PROGRESS);
     saveToStorage(STORAGE_KEYS.PORTFOLIO, DEFAULT_PORTFOLIO);
     saveToStorage(STORAGE_KEYS.HEALTH, DEFAULT_HEALTH_SCORES);
+  };
+
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    resetAllData();
+    window.location.href = '/login';
   };
 
   return (
@@ -417,7 +609,9 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
         buyAsset,
         sellAsset,
         setHealthScore,
+        awardGlossaryXp,
         resetAllData,
+        logout,
       }}
     >
       {children}

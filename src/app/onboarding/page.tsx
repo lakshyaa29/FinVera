@@ -7,14 +7,10 @@ import { useUserState } from '../../context/UserStateContext';
 import { AgeGroup, Occupation, KnowledgeLevel, RiskComfort } from '../../types';
 import { AGE_CURRICULUM_DATA } from '../../data/ageCurriculumData';
 import {
-  Sparkles,
   ArrowRight,
-  ArrowLeft,
-  CheckCircle2,
-  HelpCircle,
+  Check,
+  Flame,
   Zap,
-  BookOpen,
-  ShieldCheck,
 } from 'lucide-react';
 
 const TOPIC_CHOICES = [
@@ -43,7 +39,6 @@ export default function OnboardingPage() {
     'Mutual Funds & SIP',
     'Saving & Emergency Funds',
   ]);
-  const [learningGoal, setLearningGoal] = useState('Start my first investment and build wealth.');
   const [riskComfort, setRiskComfort] = useState<RiskComfort>('balanced');
 
   const totalSteps = 7;
@@ -64,506 +59,440 @@ export default function OnboardingPage() {
       riskComfort,
       onboarded: true,
     });
-    setStep(8); // Finish Screen
+    setStep(8);
   };
 
   const selectedAgeCohort = AGE_CURRICULUM_DATA[ageGroup];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-hidden">
-      {/* Background ambient lighting */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10">
+    <div className="min-h-screen bg-[#F8F8F3] text-[#171717] flex flex-col justify-center items-center p-4 sm:p-6 nb-pattern-grid selection:bg-[#70E000] selection:text-[#171717]">
+      <div className="w-full max-w-xl bg-[#FFFFFF] border-3 border-[#171717] rounded-xl p-6 sm:p-9 shadow-[6px_6px_0px_#171717] relative z-10">
         {/* Brand Logo Header */}
-        <div className="flex items-center justify-between pb-6 border-b border-slate-800 mb-6">
+        <div className="flex items-center justify-between pb-4 border-b-2 border-[#171717] mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center font-bold text-slate-950 text-base shadow-md">
+            <div className="w-9 h-9 rounded-lg bg-[#70E000] border-2 border-[#171717] shadow-[2px_2px_0px_#171717] flex items-center justify-center font-display font-black text-lg text-[#171717]">
               ₹
             </div>
             <div>
-              <span className="font-extrabold text-lg text-white tracking-tight">FINVERA</span>
-              <p className="text-[10px] text-slate-400 font-mono">Personalized Learning Setup</p>
+              <span className="font-display font-black text-base tracking-tight text-[#171717]">
+                FINVERA
+              </span>
+              <p className="font-mono text-[10px] text-[#6B6B6B] font-bold">Personalized Onboarding</p>
             </div>
           </div>
 
           {step <= 7 && (
-            <span className="text-xs font-mono font-bold text-slate-400">
-              Step {step} of {totalSteps}
+            <span className="nb-tag bg-[#FFD84D] text-[#171717]">
+              STEP {step} / {totalSteps}
             </span>
           )}
         </div>
 
         {/* Step Progress Bar */}
         {step <= 7 && (
-          <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-6">
+          <div className="w-full h-3 bg-[#E5E5DE] border-2 border-[#171717] rounded-full overflow-hidden mb-6">
             <div
               style={{ width: `${(step / totalSteps) * 100}%` }}
-              className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-300 rounded-full"
+              className="h-full bg-[#70E000] transition-all duration-200"
             />
           </div>
         )}
 
-        {/* STEP 1: Name */}
+        {/* STEP 1: NAME */}
         {step === 1 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                Welcome to FinVera
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">What should we call you?</h2>
-              <p className="text-xs text-slate-400 mt-1">
-                We will personalize your daily greetings, streak badges, and learning certificates.
+              <span className="nb-tag bg-[#6C8CFF] text-[#171717] mb-2">LET&apos;S GET STARTED</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                WHAT SHOULD WE CALL YOU?
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                Your name will appear on your learning dashboard, certificate rank, and simulation holdings.
               </p>
             </div>
 
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name or nickname"
-              className="w-full bg-slate-950 border border-slate-700 px-4 py-3 rounded-2xl text-base text-white focus:outline-none focus:border-emerald-500"
-              autoFocus
-            />
+            <div>
+              <label className="font-display font-bold text-xs uppercase tracking-wider text-[#171717] block mb-2">
+                Your First Name / Nickname
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Aarav, Priya, Rohan"
+                className="nb-input w-full p-3.5 font-display font-extrabold text-lg"
+                autoFocus
+              />
+            </div>
 
             <button
               onClick={() => setStep(2)}
-              className="w-full py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+              className="nb-btn nb-btn-primary w-full py-3.5 text-base"
             >
               <span>Continue</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         )}
 
-        {/* STEP 2: Age Range (13–17, 18–24, 25–34, 35+) */}
+        {/* STEP 2: AGE COHORT */}
         {step === 2 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                Cohort Personalization
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">What&apos;s your age?</h2>
-              <p className="text-xs text-slate-400 mt-1">
-                We use this to recommend the most relevant examples and educational focus. (You can
-                change this later).
+              <span className="nb-tag bg-[#B99CFF] text-[#171717] mb-2">PERSONALIZED COHORT</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                WHAT&apos;S YOUR LIFE STAGE?
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                We calibrate curriculum priorities, tax regimes, and simulations to your stage.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { range: '13-17' as AgeGroup, label: '13–17', sub: 'Teen & Student' },
-                { range: '18-24' as AgeGroup, label: '18–24', sub: 'First Job & College' },
-                { range: '25-34' as AgeGroup, label: '25–34', sub: 'Career & Family Milestones' },
-                { range: '35+' as AgeGroup, label: '35+', sub: 'Capital Growth & Retirement' },
-              ].map((item) => {
-                const isSelected = ageGroup === item.range;
-                return (
-                  <button
-                    key={item.range}
-                    type="button"
-                    onClick={() => setAgeGroup(item.range)}
-                    className={`p-4 rounded-2xl border text-left transition-all ${
-                      isSelected
-                        ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-md'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <span className="text-lg font-extrabold block font-mono">{item.label}</span>
-                    <span className="text-xs text-slate-400 mt-0.5 block">{item.sub}</span>
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(
+                [
+                  { id: '13-17', label: '13–17 Years', desc: 'Teens & School Students' },
+                  { id: '18-24', label: '18–24 Years', desc: 'College Students & First Job' },
+                  { id: '25-34', label: '25–34 Years', desc: 'Working Professionals' },
+                  { id: '35+', label: '35+ Years', desc: 'Capital Growth & FI/RE' },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setAgeGroup(opt.id)}
+                  className={`p-4 rounded-lg border-2 border-[#171717] text-left transition-all cursor-pointer ${
+                    ageGroup === opt.id
+                      ? 'bg-[#70E000] shadow-[4px_4px_0px_#171717] translate-x-[-1px] translate-y-[-1px]'
+                      : 'bg-[#FFFFFF] hover:bg-[#FAFAF7]'
+                  }`}
+                >
+                  <p className="font-display font-black text-base text-[#171717]">{opt.label}</p>
+                  <p className="text-xs text-[#171717] opacity-80 mt-0.5">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Preview Banner */}
+            <div className="p-3.5 bg-[#FAFAF7] border-2 border-[#171717] rounded-lg text-xs">
+              <span className="font-display font-bold text-[#171717] block mb-1">
+                Target Pathway: {selectedAgeCohort.title}
+              </span>
+              <p className="text-[#6B6B6B]">{selectedAgeCohort.tagline}</p>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+                className="nb-btn nb-btn-secondary flex-1 py-3"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="nb-btn nb-btn-primary flex-2 py-3"
               >
-                <span>Continue</span>
-                <ArrowRight className="w-4 h-4" />
+                Continue
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: Occupation */}
+        {/* STEP 3: OCCUPATION */}
         {step === 3 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-400 font-mono">
-                Life Stage
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">What is your current occupation?</h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Helps us frame salary and cash-flow scenarios realistically.
+              <span className="nb-tag bg-[#FFD84D] text-[#171717] mb-2">CASH FLOW SOURCE</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                WHAT IS YOUR CURRENT STATUS?
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                Helps us explain emergency funds, salary slips, or variable freelance revenue.
               </p>
             </div>
 
             <div className="space-y-2.5">
-              {[
-                { id: 'student' as Occupation, title: 'Student', desc: 'School, college, or university' },
-                { id: 'working' as Occupation, title: 'Working Professional', desc: 'Salaried employee in private or public sector' },
-                { id: 'entrepreneur' as Occupation, title: 'Entrepreneur / Freelancer', desc: 'Running a business or independent contractor' },
-                { id: 'other' as Occupation, title: 'Other / Homemaker / Explorer', desc: 'Exploring financial management' },
-              ].map((occ) => {
-                const isSelected = occupation === occ.id;
-                return (
-                  <button
-                    key={occ.id}
-                    type="button"
-                    onClick={() => setOccupation(occ.id)}
-                    className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between ${
-                      isSelected
-                        ? 'bg-teal-500/20 border-teal-400 text-teal-200 font-bold'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-semibold">{occ.title}</p>
-                      <p className="text-xs text-slate-400">{occ.desc}</p>
-                    </div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />}
-                  </button>
-                );
-              })}
+              {(
+                [
+                  { id: 'student', title: 'Student', desc: 'Managing allowance, part-time income, or campus grants' },
+                  { id: 'working', title: 'Salaried Professional', desc: 'Receiving monthly paycheck, TDS, and EPF' },
+                  { id: 'entrepreneur', title: 'Freelancer / Founder', desc: 'Managing irregular cash flow and GST' },
+                  { id: 'other', title: 'Other / Homemaker', desc: 'Household budgeting and personal wealth' },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setOccupation(opt.id)}
+                  className={`w-full p-3.5 rounded-lg border-2 border-[#171717] text-left transition-all flex items-center justify-between cursor-pointer ${
+                    occupation === opt.id
+                      ? 'bg-[#FFD84D] shadow-[3px_3px_0px_#171717]'
+                      : 'bg-[#FFFFFF] hover:bg-[#FAFAF7]'
+                  }`}
+                >
+                  <div>
+                    <p className="font-display font-black text-sm text-[#171717]">{opt.title}</p>
+                    <p className="text-xs text-[#6B6B6B] mt-0.5">{opt.desc}</p>
+                  </div>
+                  {occupation === opt.id && <Check className="w-5 h-5 text-[#171717] stroke-[3]" />}
+                </button>
+              ))}
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(2)}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+                className="nb-btn nb-btn-secondary flex-1 py-3"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep(4)}
-                className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="nb-btn nb-btn-primary flex-2 py-3"
               >
-                <span>Continue</span>
-                <ArrowRight className="w-4 h-4" />
+                Continue
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 4: Current Financial Knowledge */}
+        {/* STEP 4: KNOWLEDGE LEVEL */}
         {step === 4 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
-                Knowledge Baseline
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">
-                How would you rate your financial knowledge?
+              <span className="nb-tag bg-[#6C8CFF] text-[#171717] mb-2">STARTING LINE</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                HOW FAMILIAR ARE YOU WITH FINANCE?
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Zero judgment! We start from first principles for everyone.
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                Zero shame. We calibrate plain-English explanations accordingly.
               </p>
             </div>
 
-            <div className="space-y-2.5">
-              {[
-                {
-                  id: 'beginner' as KnowledgeLevel,
-                  title: 'Complete Beginner 🌱',
-                  desc: 'I know very little about how money, banks, or investing work.',
-                },
-                {
-                  id: 'intermediate' as KnowledgeLevel,
-                  title: 'Intermediate Learner 📈',
-                  desc: 'I have a bank account and know about FDs and stocks, but lack a clear strategy.',
-                },
-                {
-                  id: 'advanced' as KnowledgeLevel,
-                  title: 'Experienced Investor 💎',
-                  desc: 'I already invest in mutual funds and want to sharpen tax, asset allocation, and FI/RE math.',
-                },
-              ].map((lvl) => {
-                const isSelected = knowledgeLevel === lvl.id;
-                return (
-                  <button
-                    key={lvl.id}
-                    type="button"
-                    onClick={() => setKnowledgeLevel(lvl.id)}
-                    className={`w-full p-4 rounded-2xl border text-left transition-all flex items-center justify-between ${
-                      isSelected
-                        ? 'bg-amber-500/20 border-amber-400 text-amber-200 font-bold'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-semibold">{lvl.title}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{lvl.desc}</p>
-                    </div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />}
-                  </button>
-                );
-              })}
+            <div className="space-y-3">
+              {(
+                [
+                  { id: 'beginner', title: 'Total Beginner', desc: 'I know cash, but terms like SIP, ETF, or NAV sound confusing.' },
+                  { id: 'intermediate', title: 'Some Exposure', desc: 'I have a bank account and know about FDs, but want to invest in equities.' },
+                  { id: 'advanced', title: 'Active Investor', desc: 'I understand PE ratio, index funds, and want capital allocation mastery.' },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setKnowledgeLevel(opt.id)}
+                  className={`w-full p-4 rounded-lg border-2 border-[#171717] text-left transition-all flex items-center justify-between cursor-pointer ${
+                    knowledgeLevel === opt.id
+                      ? 'bg-[#70E000] shadow-[4px_4px_0px_#171717]'
+                      : 'bg-[#FFFFFF] hover:bg-[#FAFAF7]'
+                  }`}
+                >
+                  <div>
+                    <p className="font-display font-black text-base text-[#171717]">{opt.title}</p>
+                    <p className="text-xs text-[#171717] opacity-80 mt-0.5">{opt.desc}</p>
+                  </div>
+                  {knowledgeLevel === opt.id && <Check className="w-5 h-5 text-[#171717] stroke-[3]" />}
+                </button>
+              ))}
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(3)}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+                className="nb-btn nb-btn-secondary flex-1 py-3"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="nb-btn nb-btn-primary flex-2 py-3"
               >
-                <span>Continue</span>
-                <ArrowRight className="w-4 h-4" />
+                Continue
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 5: Topics to Learn */}
+        {/* STEP 5: TOPIC SELECTION */}
         {step === 5 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">
-                Curriculum Focus
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">What topics interest you most?</h2>
-              <p className="text-xs text-slate-400 mt-1">Select all that apply.</p>
+              <span className="nb-tag bg-[#B99CFF] text-[#171717] mb-2">CURRICULUM PRIORITIES</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                WHAT WOULD YOU LIKE TO MASTER FIRST?
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                Select as many as you like. We will prioritize these modules on your dashboard.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="flex flex-wrap gap-2">
               {TOPIC_CHOICES.map((topic) => {
                 const isSelected = selectedTopics.includes(topic);
                 return (
                   <button
                     key={topic}
-                    type="button"
                     onClick={() => toggleTopic(topic)}
-                    className={`p-3 rounded-xl border text-xs font-medium text-left transition-all flex items-center justify-between ${
+                    className={`px-3.5 py-2 rounded-lg border-2 border-[#171717] text-xs font-display font-bold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-200 font-bold'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                        ? 'bg-[#70E000] text-[#171717] shadow-[3px_3px_0px_#171717] translate-x-[-1px] translate-y-[-1px]'
+                        : 'bg-[#FFFFFF] text-[#6B6B6B] hover:text-[#171717]'
                     }`}
                   >
-                    <span>{topic}</span>
-                    {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                    {isSelected ? '✓ ' : '+ '}
+                    {topic}
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setStep(4)}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+                className="nb-btn nb-btn-secondary flex-1 py-3"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep(6)}
-                className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="nb-btn nb-btn-primary flex-2 py-3"
               >
-                <span>Continue</span>
-                <ArrowRight className="w-4 h-4" />
+                Continue
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 6: Primary Financial Goal */}
+        {/* STEP 6: RISK COMFORT */}
         {step === 6 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-400 font-mono">
-                Primary Objective
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">
-                What is your #1 financial learning goal?
+              <span className="nb-tag bg-[#FF6B6B] text-[#171717] mb-2">VOLATILITY DISCIPLINE</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                HOW DO YOU REACT TO VOLATILITY?
               </h2>
-              <p className="text-xs text-slate-400 mt-1">We align your roadmap milestones with this.</p>
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                If the stock market falls 10% in a week, what is your instinct?
+              </p>
             </div>
 
-            <div className="space-y-2.5">
-              {[
-                'Start my first mutual fund SIP with confidence',
-                'Build a 6-month emergency cash safety net',
-                'Understand how the stock market works without gambling',
-                'Avoid credit card debt traps and master CIBIL scores',
-                'Learn long-term wealth building & retirement math',
-              ].map((goal) => {
-                const isSelected = learningGoal === goal;
-                return (
-                  <button
-                    key={goal}
-                    type="button"
-                    onClick={() => setLearningGoal(goal)}
-                    className={`w-full p-3.5 rounded-2xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between ${
-                      isSelected
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-200 font-bold'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <span>{goal}</span>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />}
-                  </button>
-                );
-              })}
+            <div className="space-y-3">
+              {(
+                [
+                  { id: 'cautious', title: 'Conservative', desc: 'Safety first. I prefer fixed deposits, sovereign gold bonds, and capital preservation.' },
+                  { id: 'balanced', title: 'Balanced Explorer', desc: 'I accept normal market fluctuations for 12-14% index fund compounding.' },
+                  { id: 'growth', title: 'Growth Maximizer', desc: 'I view market dips as discounts to accumulate more equity units long term.' },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setRiskComfort(opt.id)}
+                  className={`w-full p-4 rounded-lg border-2 border-[#171717] text-left transition-all flex items-center justify-between cursor-pointer ${
+                    riskComfort === opt.id
+                      ? 'bg-[#FFD84D] shadow-[4px_4px_0px_#171717]'
+                      : 'bg-[#FFFFFF] hover:bg-[#FAFAF7]'
+                  }`}
+                >
+                  <div>
+                    <p className="font-display font-black text-base text-[#171717]">{opt.title}</p>
+                    <p className="text-xs text-[#171717] opacity-80 mt-0.5">{opt.desc}</p>
+                  </div>
+                  {riskComfort === opt.id && <Check className="w-5 h-5 text-[#171717] stroke-[3]" />}
+                </button>
+              ))}
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(5)}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+                className="nb-btn nb-btn-secondary flex-1 py-3"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep(7)}
-                className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="nb-btn nb-btn-primary flex-2 py-3"
               >
-                <span>Continue</span>
-                <ArrowRight className="w-4 h-4" />
+                Continue
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 7: Risk Comfort */}
+        {/* STEP 7: REVIEW & CONFIRM */}
         {step === 7 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                Risk Temperament
-              </span>
-              <h2 className="text-2xl font-extrabold text-white mt-1">
-                How comfortable are you with market volatility?
+              <span className="nb-tag bg-[#70E000] text-[#171717] mb-2">READY TO LAUNCH</span>
+              <h2 className="font-display font-black text-2xl sm:text-3xl text-[#171717] mt-1">
+                YOUR LEARNER PROFILE
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Educational profiling only; FinVera does not provide investment advisory.
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 font-medium">
+                Everything is personalized and ready for your first financial milestone.
               </p>
             </div>
 
-            <div className="space-y-2.5">
-              {[
-                {
-                  id: 'cautious' as RiskComfort,
-                  title: 'Cautious / Conservative',
-                  desc: 'I prioritize safety and hate seeing temporary portfolio dips.',
-                },
-                {
-                  id: 'balanced' as RiskComfort,
-                  title: 'Balanced / Pragmatic',
-                  desc: 'I can tolerate modest fluctuations for better long-term compounding.',
-                },
-                {
-                  id: 'growth' as RiskComfort,
-                  title: 'Growth / High Horizon',
-                  desc: 'I have 10+ years ahead and welcome volatility as buying opportunities.',
-                },
-              ].map((r) => {
-                const isSelected = riskComfort === r.id;
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setRiskComfort(r.id)}
-                    className={`w-full p-4 rounded-2xl border text-left transition-all flex items-center justify-between ${
-                      isSelected
-                        ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 font-bold'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-semibold">{r.title}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{r.desc}</p>
-                    </div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-                  </button>
-                );
-              })}
+            <div className="bg-[#FAFAF7] border-2 border-[#171717] rounded-xl p-4 space-y-3">
+              <div className="flex justify-between items-center text-xs pb-2 border-b border-[#171717]/20">
+                <span className="font-medium text-[#6B6B6B]">Display Name:</span>
+                <span className="font-display font-extrabold text-[#171717]">{name}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs pb-2 border-b border-[#171717]/20">
+                <span className="font-medium text-[#6B6B6B]">Age Cohort:</span>
+                <span className="font-display font-extrabold text-[#171717]">{ageGroup}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs pb-2 border-b border-[#171717]/20">
+                <span className="font-medium text-[#6B6B6B]">Starting Capital:</span>
+                <span className="font-mono font-black text-[#70E000] bg-[#171717] px-2 py-0.5 rounded">
+                  ₹1,00,000 Virtual Cash
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-medium text-[#6B6B6B]">Starting XP:</span>
+                <span className="font-mono font-bold text-[#171717]">50 Bonus XP</span>
+              </div>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(6)}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+                className="nb-btn nb-btn-secondary flex-1 py-3"
               >
                 Back
               </button>
               <button
                 onClick={handleFinish}
-                className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="nb-btn nb-btn-primary flex-2 py-3.5 text-base"
               >
-                <span>Generate My Path</span>
-                <Sparkles className="w-4 h-4" />
+                <span>Launch FinVera</span>
+                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
               </button>
             </div>
           </div>
         )}
 
-        {/* FINISH SCREEN: "Your FinVera journey starts now." */}
+        {/* STEP 8: CELEBRATION / FINISHED */}
         {step === 8 && (
-          <div className="text-center space-y-6 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center font-bold text-slate-950 text-2xl shadow-xl shadow-emerald-500/30">
-              <Sparkles className="w-8 h-8" />
+          <div className="text-center space-y-6 py-4">
+            <div className="w-16 h-16 rounded-xl bg-[#70E000] border-3 border-[#171717] shadow-[4px_4px_0px_#171717] flex items-center justify-center font-display font-black text-3xl mx-auto">
+              ✓
             </div>
 
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                Setup Complete
+              <span className="nb-sticker bg-[#FFD84D] text-[#171717]">
+                PROFILE ACTIVATED!
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                Your FinVera journey starts now.
+              <h2 className="font-display font-black text-3xl text-[#171717] mt-2">
+                WELCOME ABOARD, {name.toUpperCase()}!
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Here&apos;s where we&apos;ll start: customized for {name} ({selectedAgeCohort.title}).
+              <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1 max-w-sm mx-auto font-medium">
+                Your ₹1,00,000 virtual portfolio has been credited, and Level 1 lessons are unlocked.
               </p>
-            </div>
-
-            {/* Personalized Curriculum Preview */}
-            <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-left space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="text-xs font-semibold text-slate-300">
-                  Recommended Priority Focus:
-                </span>
-                <span className="text-xs font-mono font-bold text-emerald-400">
-                  Age {ageGroup}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                {selectedAgeCohort.focusTopics.map((topic) => (
-                  <span
-                    key={topic}
-                    className="text-xs px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700 text-emerald-300 font-medium"
-                  >
-                    {topic}
-                  </span>
-                ))}
-              </div>
-
-              <p className="text-[11px] text-slate-400 italic pt-1">
-                {selectedAgeCohort.exampleContext}
-              </p>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-500 text-center">
-              Educational estimate & curriculum ordering only. Never considered personalized financial advice.
             </div>
 
             <button
               onClick={() => router.push('/dashboard')}
-              className="w-full py-4 px-6 rounded-2xl font-extrabold text-base bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-xl shadow-emerald-500/25 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+              className="nb-btn nb-btn-primary w-full py-4 text-base shadow-[5px_5px_0px_#171717]"
             >
-              <span>Enter FinVera</span>
-              <ArrowRight className="w-5 h-5" />
+              <span>ENTER YOUR DASHBOARD</span>
+              <ArrowRight className="w-5 h-5 stroke-[2.5]" />
             </button>
           </div>
         )}

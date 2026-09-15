@@ -23,32 +23,32 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
   }, [loanAmount, interestRate, loanDuration]);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl">
-      <div className="flex items-center justify-between gap-2 mb-6">
+    <div className="bg-[#FFFFFF] border-3 border-[#171717] rounded-xl p-6 sm:p-7 shadow-[5px_5px_0px_#171717]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b-2 border-[#171717]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            <span className="w-3 h-3 bg-[#FFD84D] border-2 border-[#171717] rounded-full inline-block" />
+            <h3 className="text-xl sm:text-2xl font-black font-space-grotesk text-[#171717] tracking-tight">
               Loan EMI & Interest Calculator
             </h3>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm font-medium text-[#171717]/75 mt-1">
             Calculate your exact monthly installments and uncover the true interest cost of loans.
           </p>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-semibold shrink-0">
+        <span className="text-xs px-3 py-1 rounded bg-[#FFD84D] text-[#171717] border-2 border-[#171717] font-black uppercase tracking-wider shadow-[2px_2px_0px_#171717] shrink-0 self-start sm:self-auto">
           Reducing Balance
         </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         {/* Controls */}
-        <div className="lg:col-span-6 space-y-5">
+        <div className="lg:col-span-6 space-y-4">
           {/* Loan Amount */}
-          <div className="space-y-2 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+          <div className="space-y-2.5 bg-[#FAFAF7] p-4 rounded-xl border-2 border-[#171717] shadow-[2px_2px_0px_#171717]">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-semibold text-slate-300">Loan Principal Amount</label>
-              <div className="flex items-center gap-1 font-mono font-bold text-amber-400 text-sm">
+              <label className="font-black uppercase tracking-wider text-[#171717]">Loan Principal Amount</label>
+              <div className="flex items-center gap-1 font-mono font-black text-[#171717] text-sm">
                 <span>₹</span>
                 <input
                   type="number"
@@ -57,7 +57,7 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
                   step="50000"
                   value={loanAmount}
                   onChange={(e) => setLoanAmount(Math.max(10000, Number(e.target.value)))}
-                  className="w-28 bg-slate-900 border border-slate-700 px-2 py-1 rounded text-right text-amber-300 focus:outline-none focus:border-amber-500"
+                  className="w-32 bg-[#FFFFFF] border-2 border-[#171717] px-2.5 py-1 rounded-lg text-right text-[#171717] font-bold font-mono focus:outline-none focus:bg-[#FFF9D2] shadow-[1px_1px_0px_#171717]"
                 />
               </div>
             </div>
@@ -68,20 +68,22 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
               step="50000"
               value={loanAmount}
               onChange={(e) => setLoanAmount(Number(e.target.value))}
-              className="w-full accent-amber-500 cursor-pointer"
+              className="w-full accent-[#FFD84D] cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-500">
-              <span>₹50k</span>
-              <span>₹50 L</span>
-              <span>₹1 Cr</span>
+            <div className="flex justify-between text-[11px] text-[#171717]/60 font-bold font-mono">
+              <span>₹50,000</span>
+              <span>₹50 Lakhs</span>
+              <span>₹1 Crore</span>
             </div>
           </div>
 
           {/* Interest Rate */}
-          <div className="space-y-2 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+          <div className="space-y-2.5 bg-[#FAFAF7] p-4 rounded-xl border-2 border-[#171717] shadow-[2px_2px_0px_#171717]">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-semibold text-slate-300">Annual Interest Rate</label>
-              <span className="font-mono font-bold text-amber-400 text-sm">{interestRate}%</span>
+              <label className="font-black uppercase tracking-wider text-[#171717]">Annual Interest Rate</label>
+              <span className="font-mono font-black text-[#171717] text-sm px-2 py-0.5 bg-[#FFD84D] border border-[#171717] rounded">
+                {interestRate}%
+              </span>
             </div>
             <input
               type="range"
@@ -90,9 +92,9 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
               step="0.25"
               value={interestRate}
               onChange={(e) => setInterestRate(Number(e.target.value))}
-              className="w-full accent-amber-500 cursor-pointer"
+              className="w-full accent-[#FFD84D] cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-500">
+            <div className="flex justify-between text-[11px] text-[#171717]/60 font-bold font-mono">
               <span>8.5% (Home)</span>
               <span>10.5% (Car)</span>
               <span>15% (Personal)</span>
@@ -100,10 +102,12 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
           </div>
 
           {/* Loan Duration */}
-          <div className="space-y-2 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+          <div className="space-y-2.5 bg-[#FAFAF7] p-4 rounded-xl border-2 border-[#171717] shadow-[2px_2px_0px_#171717]">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-semibold text-slate-300">Loan Tenure</label>
-              <span className="font-mono font-bold text-teal-400 text-sm">{loanDuration} Years</span>
+              <label className="font-black uppercase tracking-wider text-[#171717]">Loan Tenure</label>
+              <span className="font-mono font-black text-[#171717] text-sm px-2 py-0.5 bg-[#70E000] border border-[#171717] rounded">
+                {loanDuration} Years
+              </span>
             </div>
             <input
               type="range"
@@ -112,9 +116,9 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
               step="1"
               value={loanDuration}
               onChange={(e) => setLoanDuration(Number(e.target.value))}
-              className="w-full accent-teal-500 cursor-pointer"
+              className="w-full accent-[#70E000] cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-500">
+            <div className="flex justify-between text-[11px] text-[#171717]/60 font-bold font-mono">
               <span>1 yr</span>
               <span>15 yrs</span>
               <span>30 yrs</span>
@@ -123,69 +127,68 @@ export function EmiCalculator({ initialValues }: EmiCalculatorProps) {
         </div>
 
         {/* Results */}
-        <div className="lg:col-span-6 space-y-5">
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-950 border border-amber-500/30 shadow-lg">
-            <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-1">
-              Monthly EMI Payment
+        <div className="lg:col-span-6 space-y-4">
+          <div className="p-6 rounded-xl bg-[#FAFAF7] border-3 border-[#171717] shadow-[4px_4px_0px_#171717]">
+            <p className="text-xs font-black text-[#171717] uppercase tracking-wider mb-1 font-mono">
+              ● Monthly EMI Payment
             </p>
-            <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">
+            <div className="text-3xl sm:text-4xl font-black text-[#171717] tracking-tight font-space-grotesk">
               {formatINR(result.monthlyEmi)}
-              <span className="text-sm font-normal text-slate-400 ml-1">/month</span>
+              <span className="text-sm font-bold text-[#171717]/60 ml-1">/month</span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs font-bold text-[#171717]/70 mt-1">
               For {loanDuration * 12} monthly installments
             </p>
 
-            <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-slate-800">
-              <div>
-                <p className="text-[11px] text-slate-400 font-medium">Total Interest Payable</p>
-                <p className="text-base sm:text-lg font-bold text-rose-400 font-mono">
+            <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t-2 border-[#171717]">
+              <div className="bg-[#FFFFFF] border-2 border-[#171717] p-3 rounded-lg shadow-[2px_2px_0px_#171717]">
+                <p className="text-[10px] uppercase tracking-wider font-black text-[#FF5C35]">Total Interest</p>
+                <p className="text-base sm:text-lg font-black text-[#FF5C35] font-mono mt-0.5">
                   {formatINR(result.totalInterest)}
                 </p>
               </div>
-              <div>
-                <p className="text-[11px] text-slate-400 font-medium">Total Amount Payable</p>
-                <p className="text-base sm:text-lg font-bold text-slate-200 font-mono">
+              <div className="bg-[#FFFFFF] border-2 border-[#171717] p-3 rounded-lg shadow-[2px_2px_0px_#171717]">
+                <p className="text-[10px] uppercase tracking-wider font-black text-[#171717]/70">Total Repaid</p>
+                <p className="text-base sm:text-lg font-black text-[#171717] font-mono mt-0.5">
                   {formatINR(result.totalPayment)}
                 </p>
               </div>
             </div>
 
             {/* Principal vs Interest Ratio Bar */}
-            <div className="mt-5 pt-4 border-t border-slate-800">
-              <div className="flex justify-between text-xs mb-1.5 font-medium">
-                <span className="text-teal-400">Principal: {Math.round(result.principalPercent)}%</span>
-                <span className="text-amber-400">Interest: {Math.round(result.interestPercent)}%</span>
+            <div className="mt-5 pt-4 border-t-2 border-[#171717]">
+              <div className="flex justify-between text-xs mb-1.5 font-black">
+                <span className="text-[#171717]">Principal: {Math.round(result.principalPercent)}%</span>
+                <span className="text-[#FF5C35]">Interest: {Math.round(result.interestPercent)}%</span>
               </div>
-              <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+              <div className="w-full h-4 bg-[#FFFFFF] border-2 border-[#171717] rounded-full overflow-hidden flex p-0.5">
                 <div
                   style={{ width: `${result.principalPercent}%` }}
-                  className="h-full bg-teal-500"
+                  className="h-full bg-[#70E000] rounded-l-full"
                 />
                 <div
                   style={{ width: `${result.interestPercent}%` }}
-                  className="h-full bg-amber-500"
+                  className="h-full bg-[#FF5C35] rounded-r-full"
                 />
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400 flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="font-semibold text-slate-200">Prepayment Pro Tip: </span>
-              Prepaying just 1 extra monthly EMI each year on a 20-year loan can shave off up to 4
-              years of loan tenure and save lakhs of rupees in interest.
+          <div className="p-4 rounded-xl bg-[#FFF9D2] border-2 border-[#171717] text-xs text-[#171717] flex items-start gap-2.5 shadow-[2px_2px_0px_#171717]">
+            <Info className="w-4 h-4 text-[#171717] shrink-0 mt-0.5" />
+            <div className="font-medium leading-relaxed">
+              <span className="font-black text-[#171717]">Prepayment Advantage: </span>
+              Prepaying just 1 extra monthly EMI each year on a 20-year home loan can shave off up to 4
+              years of tenure and save multiple lakhs in pure interest.
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center gap-2">
-        <HelpCircle className="w-3.5 h-3.5 shrink-0" />
+      <div className="mt-6 pt-4 border-t-2 border-[#171717] text-[11px] font-bold text-[#171717]/60 flex items-center gap-2">
+        <HelpCircle className="w-4 h-4 shrink-0 text-[#171717]" />
         <span>
-          Educational estimate only. Actual returns, interest rates, taxes and investment outcomes
-          may differ.
+          Educational estimate based on monthly reducing balance formula. Loan processing fees not included.
         </span>
       </div>
     </div>
